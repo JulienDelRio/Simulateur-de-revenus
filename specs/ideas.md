@@ -38,9 +38,12 @@ Simuler le revenu net après impôt sur le revenu (IR) en comparant une situatio
 - Décomposition par tranche IR (montant imposé par tranche + taux)
 - **Delta actuel vs futur** sur chaque ligne
 
+#### Revenus du foyer
+
+Par défaut, on demande les revenus du foyer. Option pour séparer les revenus du déclarant et du conjoint.
+
 #### Questions ouvertes
 
-- Gère-t-on les revenus du conjoint séparément ?
 - Quel barème IR utiliser ? (année en cours vs année précédente)
 
 #### Graphiques v0.1
@@ -62,19 +65,19 @@ Complète la v0.1 : le visiteur entre un salaire brut et obtient toute la chaîn
 
 - Statut : cadre / non-cadre (impact sur le taux de cotisation)
 - Temps partiel éventuel (pour le calcul des plafonds sécu)
+- *(option)* Heures supplémentaires défiscalisées (montant annuel)
+- *(option)* Mutuelle obligatoire (montant mensuel salarié)
 
 #### Résultats supplémentaires affichés
 
-- Détail des cotisations salariales (CSG, CRDS, retraite, chômage, etc.)
+- Détail des cotisations salariales (CSG, CRDS, retraite, etc.)
 - Salaire net avant impôt
 - Taux global de cotisations salariales
-- Coût total employeur (si pertinent)
+- Uniquement la part salariale (le coût employeur / super brut arrive en v0.4)
 
 #### Questions ouvertes
 
-- Gère-t-on les heures supplémentaires défiscalisées ?
-- Intègre-t-on la mutuelle obligatoire ?
-- Affiche-t-on le coût employeur ou uniquement la part salariale ?
+(aucune pour l'instant)
 
 ### v0.3 — Micro-entrepreneur
 
