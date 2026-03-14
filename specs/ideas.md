@@ -110,6 +110,10 @@ Permet de visualiser la chaîne complète : super brut → brut → net avant im
 
 Comparaison côte à côte : salarié vs micro-entrepreneur vs SASU vs EI.
 
+### v0.6 — Comparaison de foyers
+
+Comparer deux foyers avec des compositions différentes (situation familiale, nombre d'enfants, parts) pour un même niveau de revenus. Permet de visualiser l'impact de la structure du foyer sur l'imposition.
+
 ### Futures versions (idées)
 
 - Prélèvement à la source (taux personnalisé vs neutre)
