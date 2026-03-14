@@ -53,10 +53,41 @@ Simuler le revenu net après impôt sur le revenu (IR) en comparant une situatio
 - **Camembert / donut** — proportion impôt vs net sur le revenu brut
 - **Graphique par tranche** — barres horizontales montrant combien est imposé dans chaque tranche IR
 
+### v0.2 — Cotisations sociales salarié (brut → net)
+
+Ajouter le calcul du passage salaire brut → salaire net avant impôt pour les salariés.
+Complète la v0.1 : le visiteur entre un salaire brut et obtient toute la chaîne brut → net après cotisations → net imposable → net après IR.
+
+#### Informations supplémentaires à demander
+
+- Statut : cadre / non-cadre (impact sur le taux de cotisation)
+- Temps partiel éventuel (pour le calcul des plafonds sécu)
+
+#### Résultats supplémentaires affichés
+
+- Détail des cotisations salariales (CSG, CRDS, retraite, chômage, etc.)
+- Salaire net avant impôt
+- Taux global de cotisations salariales
+- Coût total employeur (si pertinent)
+
+#### Questions ouvertes
+
+- Gère-t-on les heures supplémentaires défiscalisées ?
+- Intègre-t-on la mutuelle obligatoire ?
+- Affiche-t-on le coût employeur ou uniquement la part salariale ?
+
+### v0.3 — Micro-entrepreneur
+
+Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abattement IR spécifique par activité (34 %, 50 % ou 71 %).
+
+### v0.4 — Super brut / coût employeur
+
+Ajouter le calcul du super brut (coût total employeur) pour les salariés : salaire brut + cotisations patronales.
+Permet de visualiser la chaîne complète : super brut → brut → net avant impôt → net après IR.
+
 ### Futures versions (idées)
 
-- Cotisations sociales (micro-entrepreneur, TNS, salarié)
-- Simulation multi-statuts (comparaison SASU / micro / EI)
+- v0.5 — Comparaison multi-statuts (salarié vs micro vs SASU vs EI)
 - Prélèvement à la source (taux personnalisé vs neutre)
 - CFE, TVA
 - Aide au choix de statut juridique
