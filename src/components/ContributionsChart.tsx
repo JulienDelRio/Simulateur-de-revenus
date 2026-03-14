@@ -1,9 +1,5 @@
-import {
-  PieChart, Pie, Cell, Tooltip, Legend,
-  BarChart, Bar, XAxis, YAxis, ResponsiveContainer,
-} from "recharts";
+import { useState } from "react";
 import type { SocialResult } from "../engine";
-import type { TaxResult } from "../engine";
 
 interface ChartProps {
   social: SocialResult;
@@ -69,139 +65,86 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-function ChartTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null;
-  const { name, value } = payload[0].payload ?? payload[0];
-  return (
-    <div className="bg-white border border-gray-200 rounded-md shadow-sm px-3 py-2 text-xs">
-      <p className="font-semibold text-gray-700">{name ?? payload[0].name}</p>
-      <p className="text-gray-600">{formatCurrency(value ?? payload[0].value)}</p>
-    </div>
-  );
-}
-
-// --- Chart 1: Donut ---
-export function DonutChart({ social, label }: { social: SocialResult; label?: string }) {
-  const data = groupByFamily(social);
-  if (social.totalContributions === 0) return null;
-
-  return (
-    <div>
-      {label && <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>}
-      <div style={{ width: "100%", height: 260, display: "flex", justifyContent: "center" }}>
-        <PieChart width={350} height={260}>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="42%"
-            innerRadius={45}
-            outerRadius={80}
-            dataKey="value"
-            nameKey="name"
-            paddingAngle={2}
-          >
-            {data.map((entry) => (
-              <Cell key={entry.name} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip content={<ChartTooltip />} />
-          <Legend verticalAlign="bottom" iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-        </PieChart>
-      </div>
-    </div>
-  );
-}
-
-// --- Chart 2: Stacked bar "Où va mon salaire" ---
-export function SalaryBreakdownBar({ social, irAmount, netAfterAll, label }: ChartProps) {
-  if (social.grossSalary === 0) return null;
-
-  const families = groupByFamily(social);
-  const dataEntry: Record<string, number> = { name: 1 };
-  dataEntry["Net après IR"] = netAfterAll;
-  dataEntry["Impôt"] = irAmount;
-  if (social.mutuelleAnnual > 0) dataEntry["Mutuelle"] = social.mutuelleAnnual;
-  for (const f of families) dataEntry[f.name] = f.value;
-  if (social.overtimeRelief > 0) dataEntry["Net après IR"] += social.overtimeRelief;
-
-  const data = [dataEntry];
-
-  const segments = [
-    { key: "Net après IR", color: COLORS.net },
-    { key: "Impôt", color: COLORS.ir },
-    ...(social.mutuelleAnnual > 0 ? [{ key: "Mutuelle", color: COLORS.mutuelle }] : []),
-    ...families.map((f) => ({ key: f.name, color: f.color })),
-  ];
-
-  return (
-    <div>
-      {label && <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>}
-      <div style={{ width: "100%", height: 120 }}>
-        <ResponsiveContainer>
-          <BarChart data={data} layout="vertical" barSize={40}>
-            <XAxis
-              type="number"
-              tick={{ fontSize: 10 }}
-              tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`}
-            />
-            <YAxis type="category" dataKey="name" hide />
-            <Tooltip
-              formatter={(value: number, name: string) => [formatCurrency(value), name]}
-            />
-            {segments.map((s, i) => (
-              <Bar
-                key={s.key}
-                dataKey={s.key}
-                stackId="a"
-                fill={s.color}
-                radius={i === segments.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
-              />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-1 text-xs text-gray-500">
-        {segments.map((s) => (
-          <span key={s.key} className="flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: s.color }} />
-            {s.key}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// --- Chart 3: Waterfall (cascade) ---
-// Horizontal bar chart showing deductions by family + summary
+// --- Waterfall (cascade) ---
+// Custom SVG waterfall chart with zoomed Y axis
 export function WaterfallChart({ social, irAmount, label }: ChartProps) {
   if (social.grossSalary === 0) return null;
 
   const netAfterAll = social.netBeforeIR - irAmount;
   const families = groupByFamily(social);
 
-  type Row = { name: string; value: number; color: string };
-  const rows: Row[] = [];
+  type Step = { name: string; top: number; bottom: number; color: string; isTotal: boolean };
+
+  const steps: Step[] = [];
+  let running = social.grossSalary;
+
+  steps.push({ name: "Brut", top: social.grossSalary, bottom: 0, color: "#6b7280", isTotal: true });
 
   const sorted = [...families].sort((a, b) => b.value - a.value);
   for (const f of sorted) {
-    rows.push({ name: f.name, value: f.value, color: f.color });
+    const newRunning = running - f.value;
+    steps.push({ name: f.name, top: running, bottom: newRunning, color: f.color, isTotal: false });
+    running = newRunning;
+  }
+  if (social.overtimeRelief > 0) {
+    const newRunning = running + social.overtimeRelief;
+    steps.push({ name: "Réduction HS", top: newRunning, bottom: running, color: COLORS.net, isTotal: false });
+    running = newRunning;
   }
   if (social.mutuelleAnnual > 0) {
-    rows.push({ name: "Mutuelle", value: social.mutuelleAnnual, color: COLORS.mutuelle });
+    const newRunning = running - social.mutuelleAnnual;
+    steps.push({ name: "Mutuelle", top: running, bottom: newRunning, color: COLORS.mutuelle, isTotal: false });
+    running = newRunning;
   }
   if (irAmount > 0) {
-    rows.push({ name: "Impôt sur le revenu", value: irAmount, color: COLORS.ir });
+    const newRunning = running - irAmount;
+    steps.push({ name: "Impôt", top: running, bottom: newRunning, color: COLORS.ir, isTotal: false });
+    running = newRunning;
+  }
+  steps.push({ name: "Net", top: netAfterAll, bottom: 0, color: COLORS.net, isTotal: true });
+
+  // Y axis range: zoom to show details
+  const yMin = Math.floor(netAfterAll * 0.9 / 1000) * 1000;
+  const yMax = Math.ceil(social.grossSalary * 1.05 / 1000) * 1000;
+  const yRange = yMax - yMin;
+
+  const totalDeductions = social.grossSalary - netAfterAll;
+
+  // Chart dimensions
+  const svgWidth = 500;
+  const svgHeight = 280;
+  const marginLeft = 10;
+  const marginRight = 10;
+  const marginTop = 10;
+  const marginBottom = 55;
+  const plotW = svgWidth - marginLeft - marginRight;
+  const plotH = svgHeight - marginTop - marginBottom;
+
+  const barCount = steps.length;
+  const gap = 6;
+  const barW = Math.min(40, (plotW - gap * (barCount - 1)) / barCount);
+  const totalBarWidth = barCount * barW + (barCount - 1) * gap;
+  const offsetX = marginLeft + (plotW - totalBarWidth) / 2;
+
+  function yToPixel(val: number): number {
+    return marginTop + plotH - ((val - yMin) / yRange) * plotH;
   }
 
-  const totalDeductions = rows.reduce((s, r) => s + r.value, 0);
-  const chartHeight = Math.max(200, rows.length * 32 + 80);
+  // Y axis ticks
+  const tickCount = 5;
+  const tickStep = Math.ceil(yRange / tickCount / 1000) * 1000;
+  const ticks: number[] = [];
+  for (let t = Math.ceil(yMin / tickStep) * tickStep; t <= yMax; t += tickStep) {
+    ticks.push(t);
+  }
+
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
     <div>
       {label && <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>}
 
-      <div className="flex justify-between text-sm mb-3 px-1">
+      <div className="flex justify-between text-sm mb-2 px-1">
         <span className="text-gray-500">
           Brut : <span className="font-semibold text-gray-700">{formatCurrency(social.grossSalary)}</span>
         </span>
@@ -214,68 +157,89 @@ export function WaterfallChart({ social, irAmount, label }: ChartProps) {
         </span>
       </div>
 
-      <div style={{ width: "100%", height: chartHeight }}>
-        <ResponsiveContainer>
-          <BarChart data={rows} layout="vertical" margin={{ left: 10, right: 20 }}>
-            <YAxis
-              type="category"
-              dataKey="name"
-              tick={{ fontSize: 10 }}
-              width={130}
-            />
-            <XAxis
-              type="number"
-              tick={{ fontSize: 10 }}
-              tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k €` : `${v} €`}
-            />
-            <Tooltip
-              formatter={(value: number) => [formatCurrency(value), "Montant"]}
-            />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
-              {rows.map((entry, i) => (
-                <Cell key={i} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <svg
+        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+        className="w-full"
+        style={{ maxHeight: 280 }}
+      >
+        {/* Y axis ticks & grid */}
+        {ticks.map((t) => {
+          const y = yToPixel(t);
+          return (
+            <g key={t}>
+              <line x1={marginLeft} x2={svgWidth - marginRight} y1={y} y2={y} stroke="#e5e7eb" strokeDasharray="3 3" />
+              <text x={marginLeft - 2} y={y + 3} textAnchor="end" fontSize={8} fill="#9ca3af">
+                {t >= 1000 ? `${(t / 1000).toFixed(0)}k` : t}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Bars */}
+        {steps.map((step, i) => {
+          const x = offsetX + i * (barW + gap);
+          const topClamped = Math.min(step.top, yMax);
+          const bottomClamped = Math.max(step.isTotal ? 0 : step.bottom, yMin);
+          const y1 = yToPixel(topClamped);
+          const y2 = yToPixel(bottomClamped);
+          const barHeight = Math.max(y2 - y1, 1);
+
+          return (
+            <g
+              key={i}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              style={{ cursor: "pointer" }}
+            >
+              <rect
+                x={x}
+                y={y1}
+                width={barW}
+                height={barHeight}
+                fill={step.color}
+                rx={3}
+                opacity={hoveredIdx !== null && hoveredIdx !== i ? 0.5 : 1}
+              />
+              {/* Connector line between bars */}
+              {i > 0 && i < steps.length - 1 && (
+                <line
+                  x1={x - gap}
+                  x2={x}
+                  y1={yToPixel(step.top)}
+                  y2={yToPixel(step.top)}
+                  stroke="#d1d5db"
+                  strokeDasharray="2 2"
+                />
+              )}
+              {/* X label */}
+              <text
+                x={x + barW / 2}
+                y={svgHeight - marginBottom + 12}
+                textAnchor="end"
+                fontSize={8}
+                fill="#6b7280"
+                transform={`rotate(-35, ${x + barW / 2}, ${svgHeight - marginBottom + 12})`}
+              >
+                {step.name}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Tooltip */}
+        {hoveredIdx !== null && (() => {
+          const step = steps[hoveredIdx];
+          const amount = step.isTotal ? step.top : Math.abs(step.top - step.bottom);
+          const x = offsetX + hoveredIdx * (barW + gap) + barW / 2;
+          const y = yToPixel(step.top) - 8;
+          return (
+            <text x={x} y={Math.max(y, 12)} textAnchor="middle" fontSize={9} fontWeight="bold" fill={step.color}>
+              {formatCurrency(amount)}
+            </text>
+          );
+        })()}
+      </svg>
     </div>
   );
 }
 
-// --- Chart 4: Horizontal bars by family ---
-export function HorizontalBarsChart({ social, label }: { social: SocialResult; label?: string }) {
-  const families = groupByFamily(social);
-  if (families.length === 0) return null;
-
-  const sorted = [...families].sort((a, b) => b.value - a.value);
-
-  return (
-    <div>
-      {label && <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>}
-      <div style={{ width: "100%", height: 180 }}>
-        <ResponsiveContainer>
-          <BarChart data={sorted} layout="vertical" margin={{ left: 10 }}>
-            <XAxis
-              type="number"
-              tick={{ fontSize: 10 }}
-              tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k €` : `${v} €`}
-            />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={130} />
-            <Tooltip formatter={(value: number) => formatCurrency(value)} />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
-              {sorted.map((entry) => (
-                <Cell key={entry.name} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
-
-// Backward-compatible export (used in SimulatorApp)
-export function ContributionsChart({ social, label }: { social: SocialResult; label?: string }) {
-  return <DonutChart social={social} label={label} />;
-}
