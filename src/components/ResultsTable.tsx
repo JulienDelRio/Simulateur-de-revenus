@@ -97,15 +97,16 @@ interface ComparisonTableProps {
 export function ComparisonTable({ current, future }: ComparisonTableProps) {
   const rows = [
     { label: "Revenu brut", cur: current.grossIncome, fut: future.grossIncome },
-    { label: "Revenu net imposable", cur: current.netTaxableIncome, fut: future.netTaxableIncome },
-    { label: "Impôt sur le revenu", cur: current.finalTax, fut: future.finalTax, highlight: true },
-    { label: "Revenu net après IR", cur: current.netAfterTax, fut: future.netAfterTax, highlight: true },
+    { label: "Net imposable", cur: current.netTaxableIncome, fut: future.netTaxableIncome },
+    { label: "Impôt IR", cur: current.finalTax, fut: future.finalTax, highlight: true },
+    { label: "Net après IR", cur: current.netAfterTax, fut: future.netAfterTax, highlight: true },
   ];
 
   return (
     <div>
       <h3 className="text-md font-semibold text-gray-700 mb-2">Comparaison</h3>
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm min-w-[360px]">
         <thead>
           <tr className="text-gray-500 text-xs">
             <th className="text-left py-1 px-2"></th>
@@ -145,6 +146,7 @@ export function ComparisonTable({ current, future }: ComparisonTableProps) {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
