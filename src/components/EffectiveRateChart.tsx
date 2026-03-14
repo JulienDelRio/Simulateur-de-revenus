@@ -49,7 +49,7 @@ function buildCurveData(
     const r1 = simulate({
       ...input1,
       declarant: { ...input1.declarant, grossIncome: income },
-      conjoint: input1.conjoint ? { ...input1.conjoint, grossIncome: 0 } : null,
+      conjoint: input1.conjoint ? { ...input1.conjoint } : null,
     });
 
     const point: CurvePoint = {
@@ -63,7 +63,7 @@ function buildCurveData(
       const r2 = simulate({
         ...input2,
         declarant: { ...input2.declarant, grossIncome: income },
-        conjoint: input2.conjoint ? { ...input2.conjoint, grossIncome: 0 } : null,
+        conjoint: input2.conjoint ? { ...input2.conjoint } : null,
       });
       point.rate2 = r2.effectiveRate;
       point.tax2 = r2.finalTax;

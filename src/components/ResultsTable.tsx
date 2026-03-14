@@ -95,12 +95,32 @@ interface ComparisonTableProps {
 }
 
 export function ComparisonTable({ current, future }: ComparisonTableProps) {
-  const rows = [
-    { label: "Revenu brut", cur: current.grossIncome, fut: future.grossIncome },
-    { label: "Net imposable", cur: current.netTaxableIncome, fut: future.netTaxableIncome },
-    { label: "Impôt IR", cur: current.finalTax, fut: future.finalTax, highlight: true },
-    { label: "Net après IR", cur: current.netAfterTax, fut: future.netAfterTax, highlight: true },
+  type Row =
+    | { label: string; cur: number; fut: number; highlight?: boolean; format: "currency" }
+    | { label: string; cur: number; fut: number; highlight?: boolean; format: "rate" }
+    | { label: string; cur: number; fut: number; highlight?: boolean; format: "percent" };
+
+  const rows: Row[] = [
+    { label: "Revenu brut", cur: current.grossIncome, fut: future.grossIncome, format: "currency" },
+    { label: "Net imposable", cur: current.netTaxableIncome, fut: future.netTaxableIncome, format: "currency" },
+    { label: "Impôt IR", cur: current.finalTax, fut: future.finalTax, highlight: true, format: "currency" },
+    { label: "Net après IR", cur: current.netAfterTax, fut: future.netAfterTax, highlight: true, format: "currency" },
+    { label: "TMI", cur: current.marginalRate, fut: future.marginalRate, format: "rate" },
+    { label: "Taux effectif", cur: current.effectiveRate, fut: future.effectiveRate, format: "percent" },
   ];
+
+  function formatValue(value: number, format: Row["format"]): string {
+    if (format === "currency") return formatCurrency(value);
+    if (format === "rate") return formatRate(value);
+    return formatPercent(value);
+  }
+
+  function formatDelta(delta: number, format: Row["format"]): string {
+    const prefix = delta > 0 ? "+" : "";
+    if (format === "currency") return prefix + formatCurrency(delta);
+    if (format === "rate") return prefix + formatRate(delta);
+    return prefix + formatPercent(delta);
+  }
 
   return (
     <div>
@@ -118,6 +138,7 @@ export function ComparisonTable({ current, future }: ComparisonTableProps) {
         <tbody>
           {rows.map((row) => {
             const delta = row.fut - row.cur;
+            const isMoneyRow = row.format === "currency";
             const deltaClass =
               delta > 0
                 ? "text-red-600"
@@ -132,14 +153,13 @@ export function ComparisonTable({ current, future }: ComparisonTableProps) {
               >
                 <td className="py-1.5 px-2 text-gray-600">{row.label}</td>
                 <td className="py-1.5 px-2 text-right tabular-nums">
-                  {formatCurrency(row.cur)}
+                  {formatValue(row.cur, row.format)}
                 </td>
                 <td className="py-1.5 px-2 text-right tabular-nums">
-                  {formatCurrency(row.fut)}
+                  {formatValue(row.fut, row.format)}
                 </td>
-                <td className={`py-1.5 px-2 text-right tabular-nums ${deltaClass}`}>
-                  {delta > 0 ? "+" : ""}
-                  {formatCurrency(delta)}
+                <td className={`py-1.5 px-2 text-right tabular-nums ${isMoneyRow ? deltaClass : "text-gray-500"}`}>
+                  {isMoneyRow ? formatDelta(delta, row.format) : "—"}
                 </td>
               </tr>
             );

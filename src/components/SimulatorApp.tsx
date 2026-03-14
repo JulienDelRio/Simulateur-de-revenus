@@ -6,6 +6,7 @@ import { ScenarioForm } from "./ScenarioForm";
 import { ResultsTable, ComparisonTable } from "./ResultsTable";
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
+import { TaxBracketsTable } from "./TaxBracketsTable";
 import { useUrlState } from "./useUrlState";
 import type { ScenarioState } from "./useUrlState";
 
@@ -179,6 +180,11 @@ export function SimulatorApp() {
             futureResult={futureResult}
           />
         </div>
+      </section>
+
+      {/* Tax brackets reference */}
+      <section className="pt-4 border-t border-gray-200">
+        <TaxBracketsTable />
       </section>
 
       {/* Disclaimer */}

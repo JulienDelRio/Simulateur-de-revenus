@@ -150,3 +150,40 @@ describe("simulate — separate incomes", () => {
     expect(result.netTaxableIncome).toBe(36_000 + 32_000);
   });
 });
+
+describe("simulate — RM-008: widowed with children", () => {
+  it("should have same parts as married couple", () => {
+    const result = simulate({
+      declarant: { grossIncome: 60_000, deductionMode: "forfait_10", realExpenses: 0 },
+      conjoint: null,
+      familyStatus: "veuf",
+      isJointDeclaration: false,
+      childrenCount: 2,
+      isLoneParent: false,
+    });
+
+    // Widowed with 2 children = 2 + 0.5 + 0.5 = 3 parts (same as married)
+    expect(result.parts).toBe(3);
+  });
+
+  it("should have 1 part when widowed without children", () => {
+    const result = simulate(singleIncome(40_000, { familyStatus: "veuf" }));
+    expect(result.parts).toBe(1);
+  });
+});
+
+describe("simulate — RM-009: separate declaration", () => {
+  it("should use 1 part per declarant in separate declaration", () => {
+    const result = simulate({
+      declarant: { grossIncome: 50_000, deductionMode: "forfait_10", realExpenses: 0 },
+      conjoint: null,
+      familyStatus: "marie_pacse",
+      isJointDeclaration: false,
+      childrenCount: 2,
+      isLoneParent: false,
+    });
+
+    // Separate declaration = single = 1 part (children allocated separately)
+    expect(result.parts).toBe(1);
+  });
+});
