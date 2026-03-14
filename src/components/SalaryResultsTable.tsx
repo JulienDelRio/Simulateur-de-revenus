@@ -19,17 +19,16 @@ function formatCurrencyInt(value: number): string {
 interface SalaryResultsTableProps {
   social: SocialResult;
   irAmount: number;
-  netAfterAll: number;
   label: string;
 }
 
 export function SalaryResultsTable({
   social,
   irAmount,
-  netAfterAll,
   label,
 }: SalaryResultsTableProps) {
-  const monthlyNet = Math.round((netAfterAll / 12) * 100) / 100;
+  const netAfterIR = social.netBeforeIR - irAmount;
+  const monthlyNet = Math.round((netAfterIR / 12) * 100) / 100;
 
   return (
     <div>
@@ -116,7 +115,7 @@ export function SalaryResultsTable({
           <tr className="font-semibold bg-blue-50 border-t border-gray-200">
             <td className="py-1.5 px-2">Net après impôt</td>
             <td className="py-1.5 px-2 text-right tabular-nums">
-              {formatCurrencyInt(netAfterAll)}
+              {formatCurrencyInt(netAfterIR)}
             </td>
           </tr>
 
@@ -137,20 +136,20 @@ interface SalaryComparisonProps {
   social2: SocialResult;
   ir1: number;
   ir2: number;
-  netAfterAll1: number;
-  netAfterAll2: number;
 }
 
 export function SalaryComparisonTable({
-  social1, social2, ir1, ir2, netAfterAll1, netAfterAll2,
+  social1, social2, ir1, ir2,
 }: SalaryComparisonProps) {
+  const net1 = social1.netBeforeIR - ir1;
+  const net2 = social2.netBeforeIR - ir2;
   const rows = [
     { label: "Salaire brut", v1: social1.grossSalary, v2: social2.grossSalary },
     { label: "Cotisations", v1: social1.totalContributions, v2: social2.totalContributions },
     { label: "Net avant IR", v1: social1.netBeforeIR, v2: social2.netBeforeIR },
     { label: "Impôt IR", v1: ir1, v2: ir2, highlight: true },
-    { label: "Net après IR", v1: netAfterAll1, v2: netAfterAll2, highlight: true },
-    { label: "Net mensuel", v1: Math.round((netAfterAll1 / 12) * 100) / 100, v2: Math.round((netAfterAll2 / 12) * 100) / 100, highlight: true },
+    { label: "Net après IR", v1: net1, v2: net2, highlight: true },
+    { label: "Net mensuel", v1: Math.round((net1 / 12) * 100) / 100, v2: Math.round((net2 / 12) * 100) / 100, highlight: true },
   ];
 
   return (

@@ -8,7 +8,6 @@ import type { TaxResult } from "../engine";
 interface ChartProps {
   social: SocialResult;
   irAmount: number;
-  netAfterAll: number;
   label?: string;
 }
 
@@ -175,9 +174,10 @@ export function SalaryBreakdownBar({ social, irAmount, netAfterAll, label }: Cha
 
 // --- Chart 3: Waterfall (cascade) ---
 // Horizontal bar chart showing deductions as standalone bars, sorted by size
-export function WaterfallChart({ social, irAmount, netAfterAll, label }: ChartProps) {
+export function WaterfallChart({ social, irAmount, label }: ChartProps) {
   if (social.grossSalary === 0) return null;
 
+  const netAfterAll = social.netBeforeIR - irAmount;
   const families = groupByFamily(social);
 
   type Row = { name: string; value: number; color: string };

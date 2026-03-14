@@ -140,13 +140,11 @@ function SalaryTab({
           <SalaryResultsTable
             social={result1.social}
             irAmount={result1.tax.finalTax}
-            netAfterAll={result1.netAfterAll}
             label="Situation 1"
           />
           <SalaryResultsTable
             social={result2.social}
             irAmount={result2.tax.finalTax}
-            netAfterAll={result2.netAfterAll}
             label="Situation 2"
           />
         </div>
@@ -155,20 +153,16 @@ function SalaryTab({
           social2={result2.social}
           ir1={result1.tax.finalTax}
           ir2={result2.tax.finalTax}
-          netAfterAll1={result1.netAfterAll}
-          netAfterAll2={result2.netAfterAll}
         />
         <div className="grid md:grid-cols-2 gap-6">
           <WaterfallChart
             social={result1.social}
             irAmount={result1.tax.finalTax}
-            netAfterAll={result1.netAfterAll}
             label="Du brut au net — Situation 1"
           />
           <WaterfallChart
             social={result2.social}
             irAmount={result2.tax.finalTax}
-            netAfterAll={result2.netAfterAll}
             label="Du brut au net — Situation 2"
           />
         </div>
@@ -181,13 +175,11 @@ function SalaryTab({
       <SalaryResultsTable
         social={result1.social}
         irAmount={result1.tax.finalTax}
-        netAfterAll={result1.netAfterAll}
         label="Décomposition du salaire"
       />
       <WaterfallChart
         social={result1.social}
         irAmount={result1.tax.finalTax}
-        netAfterAll={result1.netAfterAll}
         label="Du brut au net"
       />
     </div>
