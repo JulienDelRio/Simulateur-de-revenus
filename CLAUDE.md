@@ -30,10 +30,12 @@ Static website to estimate net income from gross revenue (chiffre d'affaires →
 
 - **Conventional Commits**: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`
 - Subject line < 72 characters
-- **Branches**: `feature/description`
+- **Branching model**: `main` (production) ← `develop` (integration) ← `feature/*` (dev)
+- **Feature branches**: created from `develop`, PR target is `develop`
+- **Releases**: `develop` is merged into `main` via PR when ready
 - Stage specific files only (never `git add .` or `git add -A`)
 - Run each git command in a **separate** Bash tool call (no `&&` chaining)
-- Never force-push to `main`
+- Never force-push to `main` or `develop`
 - Never skip git hooks (`--no-verify`)
 
 ## MCP — Context7
