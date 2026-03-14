@@ -23,28 +23,35 @@ Simuler le revenu net après impôt sur le revenu (IR) en comparant une situatio
 1. Situation familiale — célibataire, marié/pacsé, veuf
 2. Nombre d'enfants à charge
 3. Déclaration commune ou séparée (si marié/pacsé)
-4. Parent isolé (demi-part supplémentaire)
+4. Parent isolé (demi-part supplémentaire, garde exclusive uniquement)
 
 **Pour chaque simulation (actuel / futur) :**
 5. Revenu brut annuel
 6. Abattement : 10 % par défaut, avec option pour saisir un montant précis en €
 
-#### Résultats affichés (pour chaque simulation + comparaison)
-
-- Revenu net imposable (après abattement)
-- Montant de l'impôt sur le revenu
-- Revenu net après impôt
-- Taux marginal d'imposition (TMI)
-- Décomposition par tranche IR (montant imposé par tranche + taux)
-- **Delta actuel vs futur** sur chaque ligne
-
 #### Revenus du foyer
 
 Par défaut, on demande les revenus du foyer. Option pour séparer les revenus du déclarant et du conjoint.
+Si revenus séparés : chaque membre peut choisir indépendamment entre abattement 10 % et frais réels.
+Si revenus du foyer : un seul choix d'abattement pour le foyer.
 
-#### Questions ouvertes
+#### Règles de calcul intégrées
 
-- Quel barème IR utiliser ? (année en cours vs année précédente)
+- **Barème IR** : dernier barème connu (2026, revenus 2025), affiché explicitement à l'utilisateur
+- **Décote** : réduction pour faibles impositions (célibataire et couple)
+- **Plafonnement du quotient familial** : 1 807 € par demi-part supplémentaire
+- **Seuil de recouvrement** : impôt non dû si < 61 €
+- **Arrondis fiscaux** : IR arrondi à l'euro inférieur
+
+#### Résultats affichés (pour chaque simulation + comparaison)
+
+- Revenu net imposable (après abattement)
+- Montant de l'impôt sur le revenu (après décote et plafonnement)
+- Revenu net après impôt
+- Taux marginal d'imposition (TMI)
+- Taux effectif d'imposition
+- Décomposition par tranche IR (montant imposé par tranche + taux)
+- **Delta actuel vs futur** sur chaque ligne
 
 #### Graphiques v0.1
 
@@ -75,22 +82,44 @@ Complète la v0.1 : le visiteur entre un salaire brut et obtient toute la chaîn
 - Taux global de cotisations salariales
 - Uniquement la part salariale (le coût employeur / super brut arrive en v0.4)
 
-#### Questions ouvertes
-
-(aucune pour l'instant)
-
 ### v0.3 — Micro-entrepreneur
 
-Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abattement IR spécifique par activité (34 %, 50 % ou 71 %).
+Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abattement IR spécifique par activité.
+
+#### Types d'activité
+
+- BIC vente (abattement 71 %)
+- BIC prestation de services (abattement 50 %)
+- BNC (abattement 34 %)
+
+#### Options à gérer
+
+- **Versement libératoire de l'IR** — taux forfaitaire sur le CA au lieu du barème progressif
+- **ACRE** — exonération partielle de cotisations la première année
+
+#### Questions ouvertes
+
+- Vérifie-t-on / affiche-t-on les seuils de CA (188 700 € / 77 700 €) ?
 
 ### v0.4 — Super brut / coût employeur
 
 Ajouter le calcul du super brut (coût total employeur) pour les salariés : salaire brut + cotisations patronales.
 Permet de visualiser la chaîne complète : super brut → brut → net avant impôt → net après IR.
 
+### v0.5 — Comparaison multi-statuts
+
+Comparaison côte à côte : salarié vs micro-entrepreneur vs SASU vs EI.
+
 ### Futures versions (idées)
 
-- v0.5 — Comparaison multi-statuts (salarié vs micro vs SASU vs EI)
 - Prélèvement à la source (taux personnalisé vs neutre)
 - CFE, TVA
 - Aide au choix de statut juridique
+
+## Idées sans version attribuée
+
+- **Résidence alternée** — gestion des parts fiscales en garde alternée (plus complexe que la garde exclusive)
+- **Divorcé / séparé** — distinguer du statut célibataire (demi-part si a élevé seul un enfant 5 ans+)
+- **Régime Alsace-Moselle** — cotisation maladie salariale supplémentaire de 1,30 %
+- **Demi-part invalidité / ancien combattant** — cas spéciaux de parts supplémentaires
+- **Accessibilité** — conformité WCAG, navigation clavier, lecteur d'écran
