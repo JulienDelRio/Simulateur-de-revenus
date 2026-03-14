@@ -23,9 +23,9 @@ Stack : **Astro + React + Recharts + Tailwind + TypeScript**
 
 | # | Tâche | Statut | Fichiers |
 |---|-------|--------|----------|
-| T1 | Scaffolding Astro + React + Tailwind + Recharts | ⬜ | `package.json`, `astro.config.mjs`, `tsconfig.json`, `src/styles/global.css`, `src/pages/index.astro`, `src/layouts/Layout.astro` |
-| T2 | GitHub Actions pour GitHub Pages | ⬜ | `.github/workflows/deploy.yml` |
-| T3 | Configuration Vitest | ⬜ | `vitest.config.ts`, `package.json` |
+| T1 | Scaffolding Astro + React + Tailwind + Recharts | ✅ | `package.json`, `astro.config.mjs`, `tsconfig.json`, `src/styles/global.css`, `src/pages/index.astro`, `src/layouts/Layout.astro` |
+| T2 | GitHub Actions pour GitHub Pages | ✅ | `.github/workflows/deploy.yml` |
+| T3 | Configuration Vitest | ✅ | `vitest.config.ts`, `package.json` |
 
 ## Phase 2 — Moteur de calcul fiscal
 
