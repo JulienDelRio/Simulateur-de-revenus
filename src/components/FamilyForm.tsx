@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId } from "react";
 import type { FamilyStatus } from "../engine";
 
 interface FamilyFormProps {
@@ -24,6 +24,7 @@ export function FamilyForm({
   isSeparateIncome,
   onChange,
 }: FamilyFormProps) {
+  const uid = useId();
   const isCouple = familyStatus === "marie_pacse";
   const isSingleWithChildren =
     (familyStatus === "celibataire" || familyStatus === "veuf") &&
@@ -86,14 +87,14 @@ export function FamilyForm({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="joint-declaration"
+            id={`${uid}-joint-declaration`}
             checked={isJointDeclaration}
             onChange={(e) =>
               update({ isJointDeclaration: e.target.checked })
             }
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-          <label htmlFor="joint-declaration" className="text-sm text-gray-700">
+          <label htmlFor={`${uid}-joint-declaration`} className="text-sm text-gray-700">
             Déclaration commune
           </label>
         </div>
@@ -121,12 +122,12 @@ export function FamilyForm({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="lone-parent"
+            id={`${uid}-lone-parent`}
             checked={isLoneParent}
             onChange={(e) => update({ isLoneParent: e.target.checked })}
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-          <label htmlFor="lone-parent" className="text-sm text-gray-700">
+          <label htmlFor={`${uid}-lone-parent`} className="text-sm text-gray-700">
             Parent isolé (garde exclusive)
           </label>
         </div>
@@ -137,12 +138,12 @@ export function FamilyForm({
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            id="separate-income"
+            id={`${uid}-separate-income`}
             checked={isSeparateIncome}
             onChange={(e) => update({ isSeparateIncome: e.target.checked })}
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-          <label htmlFor="separate-income" className="text-sm text-gray-700">
+          <label htmlFor={`${uid}-separate-income`} className="text-sm text-gray-700">
             Saisir les revenus séparément (déclarant / conjoint)
           </label>
         </div>

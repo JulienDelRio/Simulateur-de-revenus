@@ -158,37 +158,40 @@ export function EffectiveRateChart({
       </h3>
       <div style={{ width: "100%", height: 280 }}>
         <ResponsiveContainer>
-          <LineChart data={curveData}>
+          <LineChart data={curveData} margin={{ left: 5, right: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="income"
               type="number"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(v) =>
                 v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v.toString()
               }
               label={{
-                value: "Revenu brut (€)",
+                value: "Salaire brut (€)",
                 position: "insideBottom",
                 offset: -5,
-                fontSize: 11,
+                fontSize: 10,
               }}
               domain={[0, maxX]}
             />
             <YAxis
               yAxisId="rate"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(v) => `${v.toFixed(0)}%`}
               domain={[0, "auto"]}
+              width={35}
             />
             <YAxis
               yAxisId="tax"
               orientation="right"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(v) =>
-                v >= 1000 ? `${(v / 1000).toFixed(0)}k €` : `${v} €`
+                v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`
               }
               domain={[0, "auto"]}
+              width={40}
+              unit=" €"
             />
             <Tooltip content={<CustomTooltip />} />
 

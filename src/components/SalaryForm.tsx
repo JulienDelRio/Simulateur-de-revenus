@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface SalaryFormData {
   isCadre: boolean;
   overtimeGross: number;
@@ -11,6 +13,7 @@ interface SalaryFormProps {
 }
 
 export function SalaryForm({ data, onChange }: SalaryFormProps) {
+  const uid = useId();
   function update(partial: Partial<SalaryFormData>) {
     const next = { ...data, ...partial };
     if (partial.hasMutuelle === false) next.mutuelleMonthly = 0;
@@ -63,12 +66,12 @@ export function SalaryForm({ data, onChange }: SalaryFormProps) {
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
-          id="has-mutuelle"
+          id={`${uid}-has-mutuelle`}
           checked={data.hasMutuelle}
           onChange={(e) => update({ hasMutuelle: e.target.checked })}
           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
         />
-        <label htmlFor="has-mutuelle" className="text-sm text-gray-700">
+        <label htmlFor={`${uid}-has-mutuelle`} className="text-sm text-gray-700">
           Mutuelle obligatoire
         </label>
       </div>
