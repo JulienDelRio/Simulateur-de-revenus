@@ -153,6 +153,25 @@ Depuis la fusion Agirc-Arrco, les taux de retraite complémentaire sont identiqu
 - **APEC** : 0,06 % (cadres uniquement)
 - **Prévoyance** : 1,50 % minimum à la charge de l'employeur (cadres uniquement, part patronale)
 
+### Heures supplémentaires — Régime social et fiscal 2026
+
+**Sources** :
+- [Réduction loi TEPA 2026 — LégiSocial](https://www.legisocial.fr/reperes-sociaux/reduction-loi-tepa-2026-heures-supplementaires.html)
+- [Heures supplémentaires imposées ? — Service Public](https://www.service-public.gouv.fr/particuliers/vosdroits/F2617)
+- [Régime social et fiscal HS 2026 — Axens Audit](https://www.axens-audit.fr/ressources/lire/actualites/heures-supplementaires-regime-social-et-fiscal/)
+
+**Réduction cotisations salariales** :
+- Taux de réduction : **11,31 %** (applicable quand la rémunération est ≤ PASS)
+- Si rémunération > PASS : taux = taux moyen des cotisations vieillesse salariales, dans la limite de 11,31 %
+- La réduction s'applique sur les cotisations d'assurance vieillesse de base et de retraite complémentaire
+
+**Exonération d'impôt sur le revenu** :
+- Les heures supplémentaires sont exonérées d'IR dans la limite de **7 500 € net imposable par an** (soit ~8 037 € brut)
+- Au-delà, la rémunération est soumise à l'IR normalement
+- La CSG/CRDS reste due sur les heures supplémentaires (pas d'exonération)
+
+> **Note** : un amendement au PLF 2026 propose de supprimer le plafond de 7 500 €. En mars 2026, le plafond de 7 500 € reste en vigueur. À surveiller.
+
 ## Simulateurs existants
 
 <!-- Références à d'autres simulateurs pour benchmarker -->
