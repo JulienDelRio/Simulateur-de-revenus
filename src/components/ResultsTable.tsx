@@ -110,8 +110,8 @@ export function ComparisonTable({ current, future }: ComparisonTableProps) {
         <thead>
           <tr className="text-gray-500 text-xs">
             <th className="text-left py-1 px-2"></th>
-            <th className="text-right py-1 px-2">Actuel</th>
-            <th className="text-right py-1 px-2">Futur</th>
+            <th className="text-right py-1 px-2">Situation 1</th>
+            <th className="text-right py-1 px-2">Situation 2</th>
             <th className="text-right py-1 px-2">Delta</th>
           </tr>
         </thead>

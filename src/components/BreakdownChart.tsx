@@ -21,7 +21,7 @@ function formatK(value: number): string {
 export function BreakdownChart({ current, future }: BreakdownChartProps) {
   const data = [
     {
-      name: "Actuel",
+      name: "Situation 1",
       "Net après IR": current.netAfterTax,
       "Impôt": current.finalTax,
     },
@@ -29,7 +29,7 @@ export function BreakdownChart({ current, future }: BreakdownChartProps) {
 
   if (future) {
     data.push({
-      name: "Futur",
+      name: "Situation 2",
       "Net après IR": future.netAfterTax,
       "Impôt": future.finalTax,
     });
