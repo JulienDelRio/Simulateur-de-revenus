@@ -31,31 +31,31 @@ Stack : **Astro + React + Recharts + Tailwind + TypeScript**
 
 | # | Tâche | Statut | Fichiers | Règles métier |
 |---|-------|--------|----------|---------------|
-| T4 | Types TypeScript | ⬜ | `src/engine/types.ts` | — |
-| T5 | Constantes barème 2026 | ⬜ | `src/engine/tax-brackets.ts` | — |
-| T6 | Calcul abattement | ⬜ | `src/engine/compute-allowance.ts`, `tests/engine/compute-allowance.test.ts` | RM-001 → RM-004 |
-| T7 | Calcul nombre de parts (QF) | ⬜ | `src/engine/compute-parts.ts`, `tests/engine/compute-parts.test.ts` | RM-005 → RM-009 |
-| T8 | Calcul IR complet + orchestrateur | ⬜ | `src/engine/compute-tax.ts`, `src/engine/compute-results.ts`, `src/engine/simulate.ts`, `tests/engine/simulate.test.ts` | RM-010 → RM-021 |
+| T4 | Types + constantes barème 2026 | ✅ | `src/engine/types.ts`, `src/engine/constants.ts` | — |
+| T5 | Calcul abattement | ✅ | `src/engine/deduction.ts` | RM-001 → RM-004 |
+| T6 | Calcul nombre de parts (QF) | ✅ | `src/engine/parts.ts` | RM-005 → RM-009 |
+| T7 | Calcul IR (barème, plafonnement, décote, seuil) | ✅ | `src/engine/tax.ts` | RM-010 → RM-018 |
+| T8 | Orchestrateur simulate() + résultats | ✅ | `src/engine/simulate.ts`, `src/engine/index.ts` | RM-019 → RM-021 |
+| T9 | Tests (4 cas spec + edge cases) | ✅ | `tests/engine/simulate.test.ts` (12 tests) | Tous |
 
 ## Phase 3 — Interface utilisateur
 
 | # | Tâche | Statut | Fichiers |
 |---|-------|--------|----------|
-| T9 | Formulaire situation familiale | ⬜ | `src/components/FamilyForm.tsx` |
-| T10 | Formulaire scénario (actuel/futur) | ⬜ | `src/components/ScenarioForm.tsx` |
-| T11 | Composant racine + état global | ⬜ | `src/components/SimulatorApp.tsx` |
-| T12 | Tableaux résultats + comparaison | ⬜ | `src/components/ResultsTable.tsx`, `src/components/ComparisonTable.tsx` |
-| T13 | Graphique barres empilées | ⬜ | `src/components/BreakdownChart.tsx` |
-| T14 | Courbe taux effectif | ⬜ | `src/components/EffectiveTaxRateChart.tsx` |
+| T10 | Formulaire situation familiale | ⬜ | `src/components/FamilyForm.tsx` |
+| T11 | Formulaire scénario (actuel/futur) | ⬜ | `src/components/ScenarioForm.tsx` |
+| T12 | Composant racine + état global | ⬜ | `src/components/SimulatorApp.tsx` |
+| T13 | Tableaux résultats + comparaison | ⬜ | `src/components/ResultsTable.tsx`, `src/components/ComparisonTable.tsx` |
+| T14 | Graphique barres empilées | ⬜ | `src/components/BreakdownChart.tsx` |
+| T15 | Courbe taux effectif | ⬜ | `src/components/EffectiveTaxRateChart.tsx` |
 
 ## Phase 4 — Intégration et polish
 
 | # | Tâche | Statut | Fichiers |
 |---|-------|--------|----------|
-| T15 | Page Astro + SEO + disclaimer | ⬜ | `src/pages/index.astro`, `src/layouts/Layout.astro` |
-| T16 | Responsive mobile-first | ⬜ | tous les `.tsx` |
-| T17 | Tests d'intégration (4 cas spec) | ⬜ | `tests/engine/simulate.test.ts` |
-| T18 | Mise à jour README + .gitignore | ⬜ | `README.md`, `.gitignore` |
+| T16 | Page Astro + SEO + disclaimer | ⬜ | `src/pages/index.astro`, `src/layouts/Layout.astro` |
+| T17 | Responsive mobile-first | ⬜ | tous les `.tsx` |
+| T18 | Mise à jour README | ⬜ | `README.md` |
 
 ---
 
