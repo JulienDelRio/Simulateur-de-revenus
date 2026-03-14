@@ -174,76 +174,69 @@ export function SalaryBreakdownBar({ social, irAmount, netAfterAll, label }: Cha
 }
 
 // --- Chart 3: Waterfall (cascade) ---
+// Horizontal bar chart showing deductions as standalone bars, sorted by size
 export function WaterfallChart({ social, irAmount, netAfterAll, label }: ChartProps) {
   if (social.grossSalary === 0) return null;
 
   const families = groupByFamily(social);
 
-  type Step = { name: string; amount: number; color: string; isTotal: boolean };
-  const steps: Step[] = [
-    { name: "Brut", amount: social.grossSalary, color: "#6b7280", isTotal: true },
-  ];
+  type Row = { name: string; value: number; color: string };
+  const rows: Row[] = [];
 
   // Deductions sorted by amount (largest first)
-  const deductions = [...families].sort((a, b) => b.value - a.value);
-  for (const f of deductions) {
-    steps.push({ name: f.name, amount: -f.value, color: f.color, isTotal: false });
-  }
-  if (social.overtimeRelief > 0) {
-    steps.push({ name: "Réduction HS", amount: social.overtimeRelief, color: COLORS.net, isTotal: false });
+  const sorted = [...families].sort((a, b) => b.value - a.value);
+  for (const f of sorted) {
+    rows.push({ name: f.name, value: f.value, color: f.color });
   }
   if (social.mutuelleAnnual > 0) {
-    steps.push({ name: "Mutuelle", amount: -social.mutuelleAnnual, color: COLORS.mutuelle, isTotal: false });
+    rows.push({ name: "Mutuelle", value: social.mutuelleAnnual, color: COLORS.mutuelle });
   }
   if (irAmount > 0) {
-    steps.push({ name: "Impôt", amount: -irAmount, color: COLORS.ir, isTotal: false });
+    rows.push({ name: "Impôt sur le revenu", value: irAmount, color: COLORS.ir });
   }
-  steps.push({ name: "Net", amount: netAfterAll, color: COLORS.net, isTotal: true });
 
-  // Build waterfall bars: invisible base + visible bar
-  let running = 0;
-  const waterfallData = steps.map((s) => {
-    if (s.isTotal) {
-      const entry = { name: s.name, base: 0, bar: s.amount, color: s.color };
-      running = s.amount;
-      return entry;
-    }
-    // For deductions: bar hangs down from current running
-    // For additions: bar grows up from current running
-    const newRunning = running + s.amount;
-    const base = Math.min(running, newRunning);
-    const bar = Math.abs(s.amount);
-    running = newRunning;
-    return { name: s.name, base, bar, color: s.color };
-  });
+  const totalDeductions = rows.reduce((s, r) => s + r.value, 0);
+
+  const heightPerRow = 32;
+  const chartHeight = Math.max(200, rows.length * heightPerRow + 80);
 
   return (
     <div>
       {label && <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>}
-      <div style={{ width: "100%", height: 300 }}>
+
+      {/* Summary line */}
+      <div className="flex justify-between text-sm mb-3 px-1">
+        <span className="text-gray-500">
+          Brut : <span className="font-semibold text-gray-700">{formatCurrency(social.grossSalary)}</span>
+        </span>
+        <span className="text-gray-500">
+          Net : <span className="font-semibold text-green-600">{formatCurrency(netAfterAll)}</span>
+        </span>
+        <span className="text-gray-500">
+          Prélevé : <span className="font-semibold text-red-500">{formatCurrency(totalDeductions)}</span>
+          {" "}({(totalDeductions / social.grossSalary * 100).toFixed(1)} %)
+        </span>
+      </div>
+
+      <div style={{ width: "100%", height: chartHeight }}>
         <ResponsiveContainer>
-          <BarChart data={waterfallData} margin={{ bottom: 20 }}>
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 9 }}
-              interval={0}
-              angle={-30}
-              textAnchor="end"
-              height={60}
-            />
+          <BarChart data={rows} layout="vertical" margin={{ left: 10, right: 20 }}>
             <YAxis
+              type="category"
+              dataKey="name"
+              tick={{ fontSize: 10 }}
+              width={130}
+            />
+            <XAxis
+              type="number"
               tick={{ fontSize: 10 }}
               tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k €` : `${v} €`}
             />
             <Tooltip
-              formatter={(value: number, name: string) => {
-                if (name === "base") return [null, null];
-                return [formatCurrency(value), "Montant"];
-              }}
+              formatter={(value: number) => [formatCurrency(value), "Montant"]}
             />
-            <Bar dataKey="base" stackId="waterfall" fill="transparent" />
-            <Bar dataKey="bar" stackId="waterfall" radius={[3, 3, 0, 0]}>
-              {waterfallData.map((entry, i) => (
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+              {rows.map((entry, i) => (
                 <Cell key={i} fill={entry.color} />
               ))}
             </Bar>
