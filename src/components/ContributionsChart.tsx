@@ -173,7 +173,7 @@ export function SalaryBreakdownBar({ social, irAmount, netAfterAll, label }: Cha
 }
 
 // --- Chart 3: Waterfall (cascade) ---
-// Horizontal bar chart showing deductions as standalone bars, sorted by size
+// Horizontal bar chart showing deductions by family + summary
 export function WaterfallChart({ social, irAmount, label }: ChartProps) {
   if (social.grossSalary === 0) return null;
 
@@ -183,7 +183,6 @@ export function WaterfallChart({ social, irAmount, label }: ChartProps) {
   type Row = { name: string; value: number; color: string };
   const rows: Row[] = [];
 
-  // Deductions sorted by amount (largest first)
   const sorted = [...families].sort((a, b) => b.value - a.value);
   for (const f of sorted) {
     rows.push({ name: f.name, value: f.value, color: f.color });
@@ -196,15 +195,12 @@ export function WaterfallChart({ social, irAmount, label }: ChartProps) {
   }
 
   const totalDeductions = rows.reduce((s, r) => s + r.value, 0);
-
-  const heightPerRow = 32;
-  const chartHeight = Math.max(200, rows.length * heightPerRow + 80);
+  const chartHeight = Math.max(200, rows.length * 32 + 80);
 
   return (
     <div>
       {label && <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>}
 
-      {/* Summary line */}
       <div className="flex justify-between text-sm mb-3 px-1">
         <span className="text-gray-500">
           Brut : <span className="font-semibold text-gray-700">{formatCurrency(social.grossSalary)}</span>
