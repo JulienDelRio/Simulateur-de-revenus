@@ -1,25 +1,17 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { simulate } from "../engine";
-import type { FamilyStatus, TaxInput } from "../engine";
+import type { TaxInput } from "../engine";
 import { FamilyForm } from "./FamilyForm";
 import { ScenarioForm } from "./ScenarioForm";
 import type { ScenarioData } from "./ScenarioForm";
 import { ResultsTable, ComparisonTable } from "./ResultsTable";
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
-
-const defaultScenario: ScenarioData = {
-  grossIncome: 30_000,
-  deductionMode: "forfait_10",
-  realExpenses: 0,
-  grossIncomeConjoint: 0,
-  deductionModeConjoint: "forfait_10",
-  realExpensesConjoint: 0,
-};
+import { useUrlState } from "./useUrlState";
 
 function buildInput(
   scenario: ScenarioData,
-  familyStatus: FamilyStatus,
+  familyStatus: string,
   isJointDeclaration: boolean,
   childrenCount: number,
   isLoneParent: boolean,
@@ -39,7 +31,7 @@ function buildInput(
             realExpenses: scenario.realExpensesConjoint,
           }
         : null,
-    familyStatus,
+    familyStatus: familyStatus as TaxInput["familyStatus"],
     isJointDeclaration,
     childrenCount,
     isLoneParent,
@@ -47,20 +39,18 @@ function buildInput(
 }
 
 export function SimulatorApp() {
-  // Family state
-  const [familyStatus, setFamilyStatus] = useState<FamilyStatus>("celibataire");
-  const [isJointDeclaration, setIsJointDeclaration] = useState(false);
-  const [childrenCount, setChildrenCount] = useState(0);
-  const [isLoneParent, setIsLoneParent] = useState(false);
-  const [isSeparateIncome, setIsSeparateIncome] = useState(false);
+  const { state, update } = useUrlState();
 
-  // Scenario state
-  const [currentScenario, setCurrentScenario] = useState<ScenarioData>(defaultScenario);
-  const [futureScenario, setFutureScenario] = useState<ScenarioData>({
-    ...defaultScenario,
-    grossIncome: 35_000,
-  });
-  const [isCompareMode, setIsCompareMode] = useState(false);
+  const {
+    familyStatus,
+    isJointDeclaration,
+    childrenCount,
+    isLoneParent,
+    isSeparateIncome,
+    isCompareMode,
+    currentScenario,
+    futureScenario,
+  } = state;
 
   // Compute results
   const currentInput = useMemo(
@@ -115,13 +105,15 @@ export function SimulatorApp() {
             childrenCount={childrenCount}
             isLoneParent={isLoneParent}
             isSeparateIncome={isSeparateIncome}
-            onChange={(v) => {
-              setFamilyStatus(v.familyStatus);
-              setIsJointDeclaration(v.isJointDeclaration);
-              setChildrenCount(v.childrenCount);
-              setIsLoneParent(v.isLoneParent);
-              setIsSeparateIncome(v.isSeparateIncome);
-            }}
+            onChange={(v) =>
+              update({
+                familyStatus: v.familyStatus,
+                isJointDeclaration: v.isJointDeclaration,
+                childrenCount: v.childrenCount,
+                isLoneParent: v.isLoneParent,
+                isSeparateIncome: v.isSeparateIncome,
+              })
+            }
           />
 
           <div className="flex items-center gap-2">
@@ -129,7 +121,7 @@ export function SimulatorApp() {
               type="checkbox"
               id="compare-mode"
               checked={isCompareMode}
-              onChange={(e) => setIsCompareMode(e.target.checked)}
+              onChange={(e) => update({ isCompareMode: e.target.checked })}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <label htmlFor="compare-mode" className="text-sm font-medium text-gray-700">
@@ -143,7 +135,7 @@ export function SimulatorApp() {
             label={isCompareMode ? "Scénario actuel" : "Revenus"}
             data={currentScenario}
             isSeparateIncome={isSeparateIncome}
-            onChange={setCurrentScenario}
+            onChange={(data) => update({ currentScenario: data })}
           />
 
           {isCompareMode && (
@@ -151,7 +143,7 @@ export function SimulatorApp() {
               label="Scénario futur"
               data={futureScenario}
               isSeparateIncome={isSeparateIncome}
-              onChange={setFutureScenario}
+              onChange={(data) => update({ futureScenario: data })}
             />
           )}
         </div>

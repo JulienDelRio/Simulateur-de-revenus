@@ -40,7 +40,8 @@ export function BreakdownChart({ current, future }: BreakdownChartProps) {
       <h3 className="text-md font-semibold text-gray-700 mb-2">
         Répartition brut / impôt / net
       </h3>
-      <ResponsiveContainer width="100%" height={250}>
+      <div style={{ width: "100%", height: 250 }}>
+      <ResponsiveContainer>
         <BarChart data={data} barCategoryGap="30%">
           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
           <YAxis tickFormatter={formatK} tick={{ fontSize: 12 }} />
@@ -68,6 +69,7 @@ export function BreakdownChart({ current, future }: BreakdownChartProps) {
           />
         </BarChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^4.0.0",
+    "@astrojs/react": "^5.0.0",
     "astro": "^6.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
