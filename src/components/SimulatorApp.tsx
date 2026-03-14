@@ -9,7 +9,7 @@ import { SalaryResultsTable, SalaryComparisonTable } from "./SalaryResultsTable"
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
-import { ContributionsChart } from "./ContributionsChart";
+import { WaterfallChart } from "./ContributionsChart";
 import { TabNav } from "./TabNav";
 import { useUrlState } from "./useUrlState";
 import type { ScenarioState } from "./useUrlState";
@@ -159,8 +159,18 @@ function SalaryTab({
           netAfterAll2={result2.netAfterAll}
         />
         <div className="grid md:grid-cols-2 gap-6">
-          <ContributionsChart social={result1.social} label="Cotisations — Situation 1" />
-          <ContributionsChart social={result2.social} label="Cotisations — Situation 2" />
+          <WaterfallChart
+            social={result1.social}
+            irAmount={result1.tax.finalTax}
+            netAfterAll={result1.netAfterAll}
+            label="Du brut au net — Situation 1"
+          />
+          <WaterfallChart
+            social={result2.social}
+            irAmount={result2.tax.finalTax}
+            netAfterAll={result2.netAfterAll}
+            label="Du brut au net — Situation 2"
+          />
         </div>
       </div>
     );
@@ -174,7 +184,12 @@ function SalaryTab({
         netAfterAll={result1.netAfterAll}
         label="Décomposition du salaire"
       />
-      <ContributionsChart social={result1.social} label="Répartition des cotisations" />
+      <WaterfallChart
+        social={result1.social}
+        irAmount={result1.tax.finalTax}
+        netAfterAll={result1.netAfterAll}
+        label="Du brut au net"
+      />
     </div>
   );
 }
