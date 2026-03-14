@@ -4,7 +4,15 @@
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`
 - Subject line under 72 characters
 
-## Branches
+## Branching Model
+- **`main`** — production-ready, stable code
+- **`develop`** — integration branch for ongoing development
+- **`feature/*`** — feature branches created from `develop`
+- Feature branches target `develop` for PRs
+- `develop` is merged into `main` via PR when a version is ready for release
+- Never force-push to `main` or `develop`
+
+## Branch Naming
 - Format: `feature/us-xxx-description` or `feature/description`
 
 ## Remote Operations
