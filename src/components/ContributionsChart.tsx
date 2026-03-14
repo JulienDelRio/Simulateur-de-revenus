@@ -104,7 +104,7 @@ export function WaterfallChart({ social, irAmount, label }: ChartProps) {
   steps.push({ name: "Net", top: netAfterAll, bottom: 0, color: COLORS.net, isTotal: true });
 
   // Y axis range: zoom to show details
-  const yMin = Math.floor(netAfterAll * 0.9 / 1000) * 1000;
+  const yMin = 0;
   const yMax = Math.ceil(social.grossSalary * 1.05 / 1000) * 1000;
   const yRange = yMax - yMin;
 
