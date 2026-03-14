@@ -120,6 +120,20 @@ Comparer deux foyers avec des compositions différentes (situation familiale, no
 - CFE, TVA
 - Aide au choix de statut juridique
 
+### Futures versions — Situations types (presets)
+
+Proposer des profils pré-remplis que le visiteur sélectionne en un clic pour remplir le formulaire. Exemples :
+
+- SMIC célibataire
+- Salarié non-cadre 30k célibataire
+- Cadre 50k marié 2 enfants
+- Cadre supérieur 80k
+- Micro-entrepreneur BNC 60k (v0.3+)
+- Jeune diplômé 28k
+- Parent isolé 1 enfant 35k
+
+Le visiteur peut ensuite ajuster les valeurs. Les presets servent de point de départ pour accélérer la saisie et aider les visiteurs qui ne connaissent pas tous les paramètres.
+
 ## Idées sans version attribuée
 
 - **Résidence alternée** — gestion des parts fiscales en garde alternée (plus complexe que la garde exclusive)
