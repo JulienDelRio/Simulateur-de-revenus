@@ -9,6 +9,7 @@ import { SalaryResultsTable, SalaryComparisonTable } from "./SalaryResultsTable"
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
+import { ContributionsChart } from "./ContributionsChart";
 import { TabNav } from "./TabNav";
 import { useUrlState } from "./useUrlState";
 import type { ScenarioState } from "./useUrlState";
@@ -157,17 +158,24 @@ function SalaryTab({
           netAfterAll1={result1.netAfterAll}
           netAfterAll2={result2.netAfterAll}
         />
+        <div className="grid md:grid-cols-2 gap-6">
+          <ContributionsChart social={result1.social} label="Cotisations — Situation 1" />
+          <ContributionsChart social={result2.social} label="Cotisations — Situation 2" />
+        </div>
       </div>
     );
   }
 
   return (
-    <SalaryResultsTable
-      social={result1.social}
-      irAmount={result1.tax.finalTax}
-      netAfterAll={result1.netAfterAll}
-      label="Décomposition du salaire"
-    />
+    <div className="space-y-6">
+      <SalaryResultsTable
+        social={result1.social}
+        irAmount={result1.tax.finalTax}
+        netAfterAll={result1.netAfterAll}
+        label="Décomposition du salaire"
+      />
+      <ContributionsChart social={result1.social} label="Répartition des cotisations" />
+    </div>
   );
 }
 
