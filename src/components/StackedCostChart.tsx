@@ -164,12 +164,12 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
             />
             <Tooltip content={<CustomTooltip />} />
 
-            <Bar dataKey="superBrut" stackId="a" fill={COLORS.superBrut} name="Super brut" />
-            <Bar dataKey="patronal" stackId="a" fill={COLORS.patronal} name="Cotis. patronales" />
-            <Bar dataKey="brut" stackId="a" fill={COLORS.brut} name="Brut" />
-            <Bar dataKey="salarial" stackId="a" fill={COLORS.salarial} name="Cotis. salariales" />
-            <Bar dataKey="ir" stackId="a" fill={COLORS.ir} name="Impôt" />
             <Bar dataKey="net" stackId="a" fill={COLORS.net} name="Net" />
+            <Bar dataKey="ir" stackId="a" fill={COLORS.ir} name="Impôt" />
+            <Bar dataKey="salarial" stackId="a" fill={COLORS.salarial} name="Cotis. salariales" />
+            <Bar dataKey="brut" stackId="a" fill={COLORS.brut} name="Brut" />
+            <Bar dataKey="patronal" stackId="a" fill={COLORS.patronal} name="Cotis. patronales" />
+            <Bar dataKey="superBrut" stackId="a" fill={COLORS.superBrut} name="Super brut" />
           </BarChart>
         </ResponsiveContainer>
       </div>
