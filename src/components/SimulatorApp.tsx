@@ -277,13 +277,15 @@ function SalaryTab({
         <div className="grid md:grid-cols-2 gap-6">
           <WaterfallChart
             social={result1.social}
+            employer={result1.employer}
             irAmount={result1.tax.finalTax}
-            label="Du brut au net — Situation 1"
+            label="Du super brut au net — Situation 1"
           />
           <WaterfallChart
             social={result2.social}
+            employer={result2.employer}
             irAmount={result2.tax.finalTax}
-            label="Du brut au net — Situation 2"
+            label="Du super brut au net — Situation 2"
           />
         </div>
       </div>
@@ -306,8 +308,9 @@ function SalaryTab({
       />
       <WaterfallChart
         social={result1.social}
+        employer={result1.employer}
         irAmount={result1.tax.finalTax}
-        label="Du brut au net"
+        label="Du super brut au net"
       />
     </div>
   );
