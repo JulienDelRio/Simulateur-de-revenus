@@ -9,7 +9,6 @@ import { SalaryResultsTable, SalaryComparisonTable } from "./SalaryResultsTable"
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
-import { WaterfallChart } from "./ContributionsChart";
 import { StackedCostChart } from "./StackedCostChart";
 import { EmployerForm } from "./EmployerForm";
 import { EmployerResultsTable } from "./EmployerResultsTable";
@@ -289,20 +288,6 @@ function SalaryTab({
             label="Répartition — Situation 2"
           />
         </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          <WaterfallChart
-            social={result1.social}
-            employer={result1.employer}
-            irAmount={result1.tax.finalTax}
-            label="Du super brut au net — Situation 1"
-          />
-          <WaterfallChart
-            social={result2.social}
-            employer={result2.employer}
-            irAmount={result2.tax.finalTax}
-            label="Du super brut au net — Situation 2"
-          />
-        </div>
       </div>
     );
   }
@@ -326,12 +311,6 @@ function SalaryTab({
         employer={result1.employer}
         irAmount={result1.tax.finalTax}
         label="Répartition du coût"
-      />
-      <WaterfallChart
-        social={result1.social}
-        employer={result1.employer}
-        irAmount={result1.tax.finalTax}
-        label="Du super brut au net"
       />
     </div>
   );
