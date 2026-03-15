@@ -91,7 +91,7 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
       ],
     },
     {
-      name: "Coût employeur",
+      name: "Cotis. patronales",
       total: employer.superBrut,
       netAfterIR: 0,
       net: 0,
@@ -121,7 +121,7 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
       ],
     },
     {
-      name: "Cotisations",
+      name: "Cotis. salariales",
       total: social.grossSalary,
       netAfterIR: 0,
       ir: 0,
