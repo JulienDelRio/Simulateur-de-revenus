@@ -149,36 +149,41 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
         { label: "Net avant impôt", amount: social.netBeforeIR, color: COLORS.net },
       ],
     },
-    {
-      name: "Impôt",
-      total: social.netBeforeIR,
-      netAfterIR: netAfterAll,
-      ir: irAmount,
-      net: 0,
-      salarial: 0,
-      brut: 0,
-      patronal: 0,
-      superBrut: 0,
-      details: [
-        { label: "Net après impôt", amount: netAfterAll, color: COLORS.netAfterIR },
-        { label: "Impôt sur le revenu", amount: irAmount, color: COLORS.ir },
-      ],
-    },
-    {
-      name: "Net après IR",
-      total: netAfterAll,
-      netAfterIR: netAfterAll,
-      ir: 0,
-      net: 0,
-      salarial: 0,
-      brut: 0,
-      patronal: 0,
-      superBrut: 0,
-      details: [
-        { label: "Net après impôt", amount: netAfterAll, color: COLORS.netAfterIR },
-      ],
-    },
   ];
+
+  if (irAmount > 0) {
+    data.push(
+      {
+        name: "Impôt",
+        total: social.netBeforeIR,
+        netAfterIR: netAfterAll,
+        ir: irAmount,
+        net: 0,
+        salarial: 0,
+        brut: 0,
+        patronal: 0,
+        superBrut: 0,
+        details: [
+          { label: "Net après impôt", amount: netAfterAll, color: COLORS.netAfterIR },
+          { label: "Impôt sur le revenu", amount: irAmount, color: COLORS.ir },
+        ],
+      },
+      {
+        name: "Net après IR",
+        total: netAfterAll,
+        netAfterIR: netAfterAll,
+        ir: 0,
+        net: 0,
+        salarial: 0,
+        brut: 0,
+        patronal: 0,
+        superBrut: 0,
+        details: [
+          { label: "Net après impôt", amount: netAfterAll, color: COLORS.netAfterIR },
+        ],
+      },
+    );
+  }
 
   const maxY = Math.ceil(employer.superBrut * 1.05 / 1000) * 1000;
 
