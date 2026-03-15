@@ -36,6 +36,7 @@ const COLORS = {
   salarial: "#93c5fd",
   ir: "#fca5a5",
   net: "#10b981",
+  netAfterIR: "#059669",
 };
 
 function CustomTooltip({ active, payload }: any) {
@@ -78,6 +79,7 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
     {
       name: "Super brut",
       total: employer.superBrut,
+      netAfterIR: 0,
       net: 0,
       ir: 0,
       salarial: 0,
@@ -91,6 +93,7 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
     {
       name: "Coût employeur",
       total: employer.superBrut,
+      netAfterIR: 0,
       net: 0,
       ir: 0,
       salarial: 0,
@@ -106,6 +109,7 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
     {
       name: "Brut",
       total: social.grossSalary,
+      netAfterIR: 0,
       net: 0,
       ir: 0,
       salarial: 0,
@@ -117,31 +121,61 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
       ],
     },
     {
-      name: "Brut → Net",
+      name: "Cotisations",
       total: social.grossSalary,
-      net: netAfterAll,
-      ir: irAmount,
+      netAfterIR: 0,
+      ir: 0,
+      net: social.netBeforeIR,
       salarial: salarialTotal,
       brut: 0,
       patronal: 0,
       superBrut: 0,
       details: [
-        { label: "Net après impôt", amount: netAfterAll, color: COLORS.net },
-        { label: "Impôt sur le revenu", amount: irAmount, color: COLORS.ir },
+        { label: "Net avant impôt", amount: social.netBeforeIR, color: COLORS.net },
         { label: "Cotisations salariales", amount: salarialTotal, color: COLORS.salarial },
       ],
     },
     {
-      name: "Net",
-      total: netAfterAll,
-      net: netAfterAll,
+      name: "Net avant IR",
+      total: social.netBeforeIR,
+      netAfterIR: 0,
       ir: 0,
+      net: social.netBeforeIR,
       salarial: 0,
       brut: 0,
       patronal: 0,
       superBrut: 0,
       details: [
-        { label: "Net après impôt", amount: netAfterAll, color: COLORS.net },
+        { label: "Net avant impôt", amount: social.netBeforeIR, color: COLORS.net },
+      ],
+    },
+    {
+      name: "Impôt",
+      total: social.netBeforeIR,
+      netAfterIR: netAfterAll,
+      ir: irAmount,
+      net: 0,
+      salarial: 0,
+      brut: 0,
+      patronal: 0,
+      superBrut: 0,
+      details: [
+        { label: "Net après impôt", amount: netAfterAll, color: COLORS.netAfterIR },
+        { label: "Impôt sur le revenu", amount: irAmount, color: COLORS.ir },
+      ],
+    },
+    {
+      name: "Net après IR",
+      total: netAfterAll,
+      netAfterIR: netAfterAll,
+      ir: 0,
+      net: 0,
+      salarial: 0,
+      brut: 0,
+      patronal: 0,
+      superBrut: 0,
+      details: [
+        { label: "Net après impôt", amount: netAfterAll, color: COLORS.netAfterIR },
       ],
     },
   ];
@@ -164,8 +198,9 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
             />
             <Tooltip content={<CustomTooltip />} />
 
-            <Bar dataKey="net" stackId="a" fill={COLORS.net} name="Net" />
+            <Bar dataKey="netAfterIR" stackId="a" fill={COLORS.netAfterIR} name="Net après IR" />
             <Bar dataKey="ir" stackId="a" fill={COLORS.ir} name="Impôt" />
+            <Bar dataKey="net" stackId="a" fill={COLORS.net} name="Net avant IR" />
             <Bar dataKey="salarial" stackId="a" fill={COLORS.salarial} name="Cotis. salariales" />
             <Bar dataKey="brut" stackId="a" fill={COLORS.brut} name="Brut" />
             <Bar dataKey="patronal" stackId="a" fill={COLORS.patronal} name="Cotis. patronales" />
@@ -175,16 +210,8 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
       </div>
       <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-1 text-xs text-gray-500">
         <span className="flex items-center gap-1">
-          <span className="inline-block w-3 h-3 rounded-sm" style={{ background: COLORS.superBrut }} />
-          Super brut
-        </span>
-        <span className="flex items-center gap-1">
           <span className="inline-block w-3 h-3 rounded-sm" style={{ background: COLORS.patronal }} />
           Cotis. patronales
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block w-3 h-3 rounded-sm" style={{ background: COLORS.brut }} />
-          Brut
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block w-3 h-3 rounded-sm" style={{ background: COLORS.salarial }} />
@@ -196,7 +223,11 @@ export function StackedCostChart({ social, employer, irAmount, label }: StackedC
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block w-3 h-3 rounded-sm" style={{ background: COLORS.net }} />
-          Net
+          Net avant IR
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded-sm" style={{ background: COLORS.netAfterIR }} />
+          Net après IR
         </span>
       </div>
     </div>
