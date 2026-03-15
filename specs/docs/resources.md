@@ -125,7 +125,7 @@ Règle : +0,5 part pour chacun des 2 premiers enfants, +1 part à partir du 3e.
 | Contribution solidarité autonomie | Totalité | — | 0,30 % |
 | FNAL (< 50 salariés) | Tranche A | — | 0,10 % |
 | FNAL (≥ 50 salariés) | Totalité | — | 0,50 % |
-| Assurance chômage | ≤ 4 PASS | — | 4,05 % |
+| Assurance chômage | ≤ 4 PASS | — | 4,00 % |
 | AGS | ≤ 4 PASS | — | 0,25 % |
 
 > Note : les cotisations maladie, allocations familiales, chômage et AGS n'ont pas de part salariale (à la charge de l'employeur uniquement).
