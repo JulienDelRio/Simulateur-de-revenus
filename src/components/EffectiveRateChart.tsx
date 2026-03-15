@@ -98,7 +98,7 @@ function CustomTooltip({ active, payload }: any) {
         <p className="font-semibold text-gray-700">{labels.join(" & ")}</p>
       )}
       <p className="text-gray-600">
-        Revenu brut : {formatCurrency(point.income)}
+        Net imposable : {formatCurrency(point.income)}
       </p>
       <div className="flex gap-4">
         <div>
@@ -154,7 +154,7 @@ export function EffectiveRateChart({
   return (
     <div>
       <h3 className="text-md font-semibold text-gray-700 mb-2">
-        Taux effectif d'imposition
+        Taux effectif IR (sur le net imposable)
       </h3>
       <div style={{ width: "100%", height: 280 }}>
         <ResponsiveContainer>
@@ -168,7 +168,7 @@ export function EffectiveRateChart({
                 v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v.toString()
               }
               label={{
-                value: "Salaire brut (€)",
+                value: "Net imposable (€)",
                 position: "insideBottom",
                 offset: -5,
                 fontSize: 10,
