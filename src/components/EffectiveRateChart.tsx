@@ -46,11 +46,15 @@ function buildCurveData(
   const sorted = [...incomes].sort((a, b) => a - b);
 
   return sorted.map((income) => {
-    const r1 = simulate({
-      ...input1,
+    const simInput1 = {
       declarant: { ...input1.declarant, grossIncome: income },
       conjoint: input1.conjoint ? { ...input1.conjoint } : null,
-    });
+      familyStatus: input1.familyStatus,
+      isJointDeclaration: input1.isJointDeclaration,
+      childrenCount: input1.childrenCount,
+      isLoneParent: input1.isLoneParent,
+    };
+    const r1 = simulate(simInput1);
 
     const point: CurvePoint = {
       income,
@@ -60,11 +64,15 @@ function buildCurveData(
     };
 
     if (input2) {
-      const r2 = simulate({
-        ...input2,
+      const simInput2 = {
         declarant: { ...input2.declarant, grossIncome: income },
         conjoint: input2.conjoint ? { ...input2.conjoint } : null,
-      });
+        familyStatus: input2.familyStatus,
+        isJointDeclaration: input2.isJointDeclaration,
+        childrenCount: input2.childrenCount,
+        isLoneParent: input2.isLoneParent,
+      };
+      const r2 = simulate(simInput2);
       point.rate2 = r2.effectiveRate;
       point.tax2 = r2.finalTax;
       point.marker2 = income2 !== null && income === income2 ? true : undefined;
