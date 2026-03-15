@@ -102,23 +102,48 @@ function SituationBlock({
             })
           }
         />
-        <SalaryForm
-          data={{
-            isCadre: scenario.isCadre,
-            overtimeGross: scenario.overtimeGross,
-            hasMutuelle: scenario.hasMutuelle,
-            mutuelleMonthly: scenario.mutuelleMonthly,
-          }}
-          onChange={(data) =>
-            onChange({
-              ...scenario,
-              isCadre: data.isCadre,
-              overtimeGross: data.overtimeGross,
-              hasMutuelle: data.hasMutuelle,
-              mutuelleMonthly: data.mutuelleMonthly,
-            })
-          }
-        />
+        <div className="space-y-4">
+          <SalaryForm
+            data={{
+              isCadre: scenario.isCadre,
+              overtimeGross: scenario.overtimeGross,
+              hasMutuelle: scenario.hasMutuelle,
+              mutuelleMonthly: scenario.mutuelleMonthly,
+            }}
+            onChange={(data) =>
+              onChange({
+                ...scenario,
+                isCadre: data.isCadre,
+                overtimeGross: data.overtimeGross,
+                hasMutuelle: data.hasMutuelle,
+                mutuelleMonthly: data.mutuelleMonthly,
+              })
+            }
+          />
+          {scenario.isSeparateIncome && (
+            <>
+              <hr className="border-gray-200" />
+              <p className="text-sm font-medium text-gray-500">Conjoint</p>
+              <SalaryForm
+                data={{
+                  isCadre: scenario.isCadreConjoint,
+                  overtimeGross: scenario.overtimeGrossConjoint,
+                  hasMutuelle: scenario.hasMutuelleConjoint,
+                  mutuelleMonthly: scenario.mutuelleMonthlyConjoint,
+                }}
+                onChange={(data) =>
+                  onChange({
+                    ...scenario,
+                    isCadreConjoint: data.isCadre,
+                    overtimeGrossConjoint: data.overtimeGross,
+                    hasMutuelleConjoint: data.hasMutuelle,
+                    mutuelleMonthlyConjoint: data.mutuelleMonthly,
+                  })
+                }
+              />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

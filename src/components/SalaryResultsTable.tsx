@@ -68,7 +68,14 @@ export function SalaryResultsTable({
 
           {social.overtimeRelief > 0 && (
             <tr className="text-green-600">
-              <td className="py-0.5 px-2 text-sm">Réduction HS</td>
+              <td className="py-0.5 px-2 text-sm">
+                Réduction HS
+                {social.overtimeIRExemption > 0 && (
+                  <span className="text-xs text-green-500 ml-1">
+                    (économie IR : {formatCurrency(social.overtimeIRExemption)})
+                  </span>
+                )}
+              </td>
               <td className="py-0.5 px-2 text-right tabular-nums text-sm">
                 + {formatCurrency(social.overtimeRelief)}
               </td>
@@ -125,8 +132,35 @@ export function SalaryResultsTable({
               {formatCurrency(monthlyNet)} /mois
             </td>
           </tr>
+
+          {/* Rates summary */}
+          <tr className="border-t border-gray-100">
+            <td className="py-1 px-2 text-gray-500 text-xs">Taux de cotisations</td>
+            <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+              {social.contributionRate.toFixed(1)} %
+            </td>
+          </tr>
+          {social.grossSalary > 0 && (
+            <tr>
+              <td className="py-1 px-2 text-gray-500 text-xs">Taux effectif IR</td>
+              <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+                {(irAmount / social.grossSalary * 100).toFixed(1)} %
+              </td>
+            </tr>
+          )}
+          <tr>
+            <td className="py-1 px-2 text-gray-500 text-xs">Taux global de prélèvement</td>
+            <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+              {social.grossSalary > 0
+                ? ((social.grossSalary - netAfterIR) / social.grossSalary * 100).toFixed(1)
+                : "0.0"} %
+            </td>
+          </tr>
         </tbody>
       </table>
+      <p className="text-xs text-gray-400 mt-2 px-2">
+        PASS 2026 : 48 060 € — Barème cotisations 2026
+      </p>
     </div>
   );
 }
@@ -143,6 +177,8 @@ export function SalaryComparisonTable({
 }: SalaryComparisonProps) {
   const net1 = social1.netBeforeIR - ir1;
   const net2 = social2.netBeforeIR - ir2;
+  const rate1 = social1.grossSalary > 0 ? (social1.grossSalary - net1) / social1.grossSalary * 100 : 0;
+  const rate2 = social2.grossSalary > 0 ? (social2.grossSalary - net2) / social2.grossSalary * 100 : 0;
   const rows = [
     { label: "Salaire brut", v1: social1.grossSalary, v2: social2.grossSalary },
     { label: "Cotisations", v1: social1.totalContributions, v2: social2.totalContributions },
@@ -150,7 +186,8 @@ export function SalaryComparisonTable({
     { label: "Impôt IR", v1: ir1, v2: ir2, highlight: true },
     { label: "Net après IR", v1: net1, v2: net2, highlight: true },
     { label: "Net mensuel", v1: Math.round((net1 / 12) * 100) / 100, v2: Math.round((net2 / 12) * 100) / 100, highlight: true },
-  ];
+    { label: "Taux prélèvement", v1: Math.round(rate1 * 10) / 10, v2: Math.round(rate2 * 10) / 10, isPercent: true },
+  ] as const;
 
   return (
     <div>
@@ -171,13 +208,16 @@ export function SalaryComparisonTable({
               const deltaClass =
                 delta > 0 ? "text-green-600" : delta < 0 ? "text-red-600" : "text-gray-400";
 
+              const isPct = "isPercent" in row && row.isPercent;
+              const fmt = (v: number) => isPct ? `${v.toFixed(1)} %` : formatCurrencyInt(v);
+
               return (
                 <tr key={row.label} className={row.highlight ? "font-semibold bg-blue-50" : ""}>
                   <td className="py-1.5 px-2 text-gray-600">{row.label}</td>
-                  <td className="py-1.5 px-2 text-right tabular-nums">{formatCurrencyInt(row.v1)}</td>
-                  <td className="py-1.5 px-2 text-right tabular-nums">{formatCurrencyInt(row.v2)}</td>
-                  <td className={`py-1.5 px-2 text-right tabular-nums ${deltaClass}`}>
-                    {delta > 0 ? "+" : ""}{formatCurrencyInt(delta)}
+                  <td className="py-1.5 px-2 text-right tabular-nums">{fmt(row.v1)}</td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">{fmt(row.v2)}</td>
+                  <td className={`py-1.5 px-2 text-right tabular-nums ${isPct ? "text-gray-500" : deltaClass}`}>
+                    {isPct ? "—" : `${delta > 0 ? "+" : ""}${formatCurrencyInt(delta)}`}
                   </td>
                 </tr>
               );
