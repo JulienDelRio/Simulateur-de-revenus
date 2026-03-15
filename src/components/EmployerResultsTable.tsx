@@ -31,10 +31,10 @@ export function EmployerResultsTable({ employer, label, isDetailView }: Employer
       <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>
       <table className="w-full text-sm">
         <tbody>
-          <tr>
-            <td className="py-1.5 px-2 text-gray-600">Salaire brut</td>
+          <tr className="font-semibold bg-purple-50">
+            <td className="py-1.5 px-2">Super brut (coût employeur)</td>
             <td className="py-1.5 px-2 text-right tabular-nums">
-              {formatCurrencyInt(employer.grossSalary)}
+              {formatCurrencyInt(employer.superBrut)}
             </td>
           </tr>
 
@@ -48,7 +48,7 @@ export function EmployerResultsTable({ employer, label, isDetailView }: Employer
                     </span>
                   </td>
                   <td className="py-0.5 px-2 text-right tabular-nums text-xs">
-                    + {formatCurrency(c.amount)}
+                    - {formatCurrency(c.amount)}
                   </td>
                 </tr>
               ))
@@ -56,7 +56,7 @@ export function EmployerResultsTable({ employer, label, isDetailView }: Employer
                 <tr key={f.name} className="text-gray-400">
                   <td className="py-0.5 px-2 pl-4 text-xs">{f.name}</td>
                   <td className="py-0.5 px-2 text-right tabular-nums text-xs">
-                    + {formatCurrency(f.amount)}
+                    - {formatCurrency(f.amount)}
                   </td>
                 </tr>
               ))}
@@ -66,7 +66,7 @@ export function EmployerResultsTable({ employer, label, isDetailView }: Employer
               Total cotisations patronales ({employer.contributionRate.toFixed(1)} %)
             </td>
             <td className="py-1 px-2 text-right tabular-nums text-sm">
-              + {formatCurrency(employer.totalContributions)}
+              - {formatCurrency(employer.totalContributions)}
             </td>
           </tr>
 
@@ -81,30 +81,34 @@ export function EmployerResultsTable({ employer, label, isDetailView }: Employer
                 )}
               </td>
               <td className="py-0.5 px-2 text-right tabular-nums text-sm">
-                - {formatCurrency(employer.rgdu.amount)}
+                + {formatCurrency(employer.rgdu.amount)}
               </td>
             </tr>
           )}
 
-          <tr className="font-semibold bg-purple-50 border-t border-gray-200">
-            <td className="py-1.5 px-2">Super brut (coût employeur)</td>
+          <tr className="font-semibold bg-gray-50 border-t border-gray-200">
+            <td className="py-1.5 px-2">Salaire brut</td>
             <td className="py-1.5 px-2 text-right tabular-nums">
-              {formatCurrencyInt(employer.superBrut)}
+              {formatCurrencyInt(employer.grossSalary)}
             </td>
           </tr>
 
-          <tr className="border-t border-gray-100">
-            <td className="py-1 px-2 text-gray-500 text-xs">Taux cotisations patronales</td>
-            <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
-              {employer.contributionRate.toFixed(1)} %
-            </td>
-          </tr>
-          <tr>
-            <td className="py-1 px-2 text-gray-500 text-xs">Taux effectif (après RGDU)</td>
-            <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
-              {employer.effectiveRate.toFixed(1)} %
-            </td>
-          </tr>
+          {isDetailView && (
+            <>
+              <tr className="border-t border-gray-100">
+                <td className="py-1 px-2 text-gray-500 text-xs">Taux cotisations patronales</td>
+                <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+                  {employer.contributionRate.toFixed(1)} %
+                </td>
+              </tr>
+              <tr>
+                <td className="py-1 px-2 text-gray-500 text-xs">Taux effectif (après RGDU)</td>
+                <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+                  {employer.effectiveRate.toFixed(1)} %
+                </td>
+              </tr>
+            </>
+          )}
         </tbody>
       </table>
     </div>
