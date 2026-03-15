@@ -30,6 +30,11 @@ function buildCombinedInput(s: ScenarioState): CombinedInput {
       mutuelleMonthly: s.mutuelleMonthly,
       deductionMode: s.deductionMode,
       realExpenses: s.realExpenses,
+      companySize: s.companySize,
+      atmpRate: s.atmpRate / 100,
+      hasTransportLevy: s.hasTransportLevy,
+      transportLevyRate: s.transportLevyRate / 100,
+      prevoyanceRate: s.prevoyanceRate / 100,
     },
     conjoint: s.isSeparateIncome
       ? {
@@ -40,6 +45,11 @@ function buildCombinedInput(s: ScenarioState): CombinedInput {
           mutuelleMonthly: s.mutuelleMonthlyConjoint,
           deductionMode: s.deductionModeConjoint,
           realExpenses: s.realExpensesConjoint,
+          companySize: s.companySizeConjoint,
+          atmpRate: s.atmpRateConjoint / 100,
+          hasTransportLevy: s.hasTransportLevyConjoint,
+          transportLevyRate: s.transportLevyRateConjoint / 100,
+          prevoyanceRate: s.prevoyanceRateConjoint / 100,
         }
       : null,
     familyStatus: s.familyStatus,
