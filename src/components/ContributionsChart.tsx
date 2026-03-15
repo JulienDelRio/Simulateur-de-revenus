@@ -50,6 +50,16 @@ export function WaterfallChart({ social, employer, irAmount, label }: ChartProps
   const employerFamilies = groupByFamily(employer.contributions);
   const socialFamilies = groupByFamily(social.contributions);
 
+  // Distribute RGDU proportionally across employer families to show net cost
+  const rgduAmount = employer.rgdu.amount;
+  const totalEmployerRaw = employerFamilies.reduce((s, f) => s + f.amount, 0);
+  const empFamiliesNet = employerFamilies.map((f) => ({
+    ...f,
+    amount: totalEmployerRaw > 0
+      ? Math.round((f.amount - f.amount / totalEmployerRaw * rgduAmount) * 100) / 100
+      : f.amount,
+  })).filter((f) => f.amount > 0);
+
   type Step = { name: string; top: number; bottom: number; color: string; isTotal: boolean };
 
   const steps: Step[] = [];
@@ -58,18 +68,11 @@ export function WaterfallChart({ social, employer, irAmount, label }: ChartProps
   // Start: Super brut
   steps.push({ name: "Super brut", top: employer.superBrut, bottom: 0, color: COLORS.employer, isTotal: true });
 
-  // Employer contributions (grouped by family, descending)
-  const empSorted = [...employerFamilies].sort((a, b) => b.amount - a.amount);
+  // Employer contributions net of RGDU (grouped by family, descending)
+  const empSorted = [...empFamiliesNet].sort((a, b) => b.amount - a.amount);
   for (const f of empSorted) {
     const newRunning = running - f.amount;
     steps.push({ name: f.name, top: running, bottom: newRunning, color: familyColor(f.name), isTotal: false });
-    running = newRunning;
-  }
-
-  // RGDU (positive step back up)
-  if (employer.rgdu.isEligible && employer.rgdu.amount > 0) {
-    const newRunning = running + employer.rgdu.amount;
-    steps.push({ name: "RGDU", top: newRunning, bottom: running, color: COLORS.net, isTotal: false });
     running = newRunning;
   }
 
@@ -148,7 +151,7 @@ export function WaterfallChart({ social, employer, irAmount, label }: ChartProps
     <div>
       {label && <h3 className="text-md font-semibold text-gray-700 mb-2">{label}</h3>}
 
-      <div className="flex justify-between text-sm mb-2 px-1">
+      <div className="flex flex-wrap justify-between text-sm mb-2 px-1 gap-1">
         <span className="text-gray-500">
           Super brut : <span className="font-semibold text-purple-600">{formatCurrency(employer.superBrut)}</span>
         </span>
@@ -158,6 +161,11 @@ export function WaterfallChart({ social, employer, irAmount, label }: ChartProps
         <span className="text-gray-500">
           Net : <span className="font-semibold text-green-600">{formatCurrency(netAfterAll)}</span>
         </span>
+        {rgduAmount > 0 && (
+          <span className="text-gray-400 text-xs">
+            (dont RGDU : {formatCurrency(rgduAmount)})
+          </span>
+        )}
       </div>
 
       <svg
