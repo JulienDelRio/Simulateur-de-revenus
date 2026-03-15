@@ -80,9 +80,14 @@ Complète la v0.1 : le visiteur entre un salaire brut et obtient toute la chaîn
 - Détail des cotisations salariales (CSG, CRDS, retraite, etc.)
 - Salaire net avant impôt
 - Taux global de cotisations salariales
-- Uniquement la part salariale (le coût employeur / super brut arrive en v0.4)
+- Uniquement la part salariale (le coût employeur / super brut arrive en v0.3)
 
-### v0.3 — Micro-entrepreneur
+### v0.3 — Super brut / coût employeur
+
+Ajouter le calcul du super brut (coût total employeur) pour les salariés : salaire brut + cotisations patronales.
+Permet de visualiser la chaîne complète : super brut → brut → net avant impôt → net après IR.
+
+### v0.4 — Micro-entrepreneur
 
 Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abattement IR spécifique par activité.
 
@@ -100,11 +105,6 @@ Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abatteme
 #### Questions ouvertes
 
 - Vérifie-t-on / affiche-t-on les seuils de CA (188 700 € / 77 700 €) ?
-
-### v0.4 — Super brut / coût employeur
-
-Ajouter le calcul du super brut (coût total employeur) pour les salariés : salaire brut + cotisations patronales.
-Permet de visualiser la chaîne complète : super brut → brut → net avant impôt → net après IR.
 
 ### v0.5 — Comparaison multi-statuts
 

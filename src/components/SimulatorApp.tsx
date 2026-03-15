@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { simulateCombined } from "../engine";
+import { useState, useMemo, useId } from "react";
+import { simulate, simulateCombined } from "../engine";
 import type { CombinedInput, CombinedResult } from "../engine";
 import { FamilyForm } from "./FamilyForm";
 import { ScenarioForm } from "./ScenarioForm";
@@ -9,7 +9,9 @@ import { SalaryResultsTable, SalaryComparisonTable } from "./SalaryResultsTable"
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
-import { WaterfallChart } from "./ContributionsChart";
+import { StackedCostChart } from "./StackedCostChart";
+import { EmployerForm } from "./EmployerForm";
+import { EmployerResultsTable, EmployerComparisonTable } from "./EmployerResultsTable";
 import { TabNav } from "./TabNav";
 import { useUrlState } from "./useUrlState";
 import type { ScenarioState } from "./useUrlState";
@@ -30,6 +32,11 @@ function buildCombinedInput(s: ScenarioState): CombinedInput {
       mutuelleMonthly: s.mutuelleMonthly,
       deductionMode: s.deductionMode,
       realExpenses: s.realExpenses,
+      companySize: s.companySize,
+      atmpRate: s.atmpRate / 100,
+      hasTransportLevy: s.hasTransportLevy,
+      transportLevyRate: s.transportLevyRate / 100,
+      prevoyanceRate: s.prevoyanceRate / 100,
     },
     conjoint: s.isSeparateIncome
       ? {
@@ -40,6 +47,11 @@ function buildCombinedInput(s: ScenarioState): CombinedInput {
           mutuelleMonthly: s.mutuelleMonthlyConjoint,
           deductionMode: s.deductionModeConjoint,
           realExpenses: s.realExpensesConjoint,
+          companySize: s.companySizeConjoint,
+          atmpRate: s.atmpRateConjoint / 100,
+          hasTransportLevy: s.hasTransportLevyConjoint,
+          transportLevyRate: s.transportLevyRateConjoint / 100,
+          prevoyanceRate: s.prevoyanceRateConjoint / 100,
         }
       : null,
     familyStatus: s.familyStatus,
@@ -120,6 +132,26 @@ function SituationBlock({
               })
             }
           />
+          <EmployerForm
+            data={{
+              companySize: scenario.companySize,
+              atmpRate: scenario.atmpRate,
+              hasTransportLevy: scenario.hasTransportLevy,
+              transportLevyRate: scenario.transportLevyRate,
+              prevoyanceRate: scenario.prevoyanceRate,
+              isCadre: scenario.isCadre,
+            }}
+            onChange={(data) =>
+              onChange({
+                ...scenario,
+                companySize: data.companySize,
+                atmpRate: data.atmpRate,
+                hasTransportLevy: data.hasTransportLevy,
+                transportLevyRate: data.transportLevyRate,
+                prevoyanceRate: data.prevoyanceRate,
+              })
+            }
+          />
           {scenario.isSeparateIncome && (
             <>
               <hr className="border-gray-200" />
@@ -141,12 +173,75 @@ function SituationBlock({
                   })
                 }
               />
+              <EmployerForm
+                data={{
+                  companySize: scenario.companySizeConjoint,
+                  atmpRate: scenario.atmpRateConjoint,
+                  hasTransportLevy: scenario.hasTransportLevyConjoint,
+                  transportLevyRate: scenario.transportLevyRateConjoint,
+                  prevoyanceRate: scenario.prevoyanceRateConjoint,
+                  isCadre: scenario.isCadreConjoint,
+                }}
+                onChange={(data) =>
+                  onChange({
+                    ...scenario,
+                    companySizeConjoint: data.companySize,
+                    atmpRateConjoint: data.atmpRate,
+                    hasTransportLevyConjoint: data.hasTransportLevy,
+                    transportLevyRateConjoint: data.transportLevyRate,
+                    prevoyanceRateConjoint: data.prevoyanceRate,
+                  })
+                }
+              />
             </>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+type IRMode = "none" | "foyer" | "individualized";
+
+function computeIndividualizedIR(
+  result: CombinedResult,
+  member: "declarant" | "conjoint",
+): number {
+  if (!result.socialConjoint) return result.tax.finalTax;
+
+  const rev1 = result.social.netTaxable;
+  const rev2 = result.socialConjoint.netTaxable;
+  const irFoyer = result.tax.finalTax;
+  const parts = result.tax.parts;
+
+  // Determine who has the lowest income
+  const isDeclarantLower = rev1 <= rev2;
+  const revLow = isDeclarantLower ? rev1 : rev2;
+  const revHigh = isDeclarantLower ? rev2 : rev1;
+
+  // Taux 1: IR on the lower income with half the foyer's parts
+  // Half the parts = base 1 + half of children's parts
+  // For 3 parts (couple + 2 children): half = 1.5 parts → celibataire + 1 child
+  const halfChildrenParts = (parts - 2) / 2; // children's half-parts
+  const halfChildren = Math.round(halfChildrenParts * 2); // convert to children count for celibataire
+
+  const irLowResult = simulate({
+    declarant: { grossIncome: revLow, deductionMode: "forfait_10", realExpenses: 0 },
+    conjoint: null,
+    familyStatus: "celibataire",
+    isJointDeclaration: false,
+    childrenCount: halfChildren,
+    isLoneParent: halfChildren > 0,
+  });
+  const taux1 = revLow > 0 ? irLowResult.finalTax / revLow : 0;
+
+  // Taux 2: residual = (IR_foyer - taux1 * revLow) / revHigh
+  const taux2 = revHigh > 0 ? Math.max(0, (irFoyer - taux1 * revLow) / revHigh) : 0;
+
+  if (member === "declarant") {
+    return Math.round((isDeclarantLower ? taux1 : taux2) * rev1);
+  }
+  return Math.round((isDeclarantLower ? taux2 : taux1) * rev2);
 }
 
 function SalaryTab({
@@ -158,19 +253,117 @@ function SalaryTab({
   result2: CombinedResult | null;
   isCompareMode: boolean;
 }) {
+  const [isDetailView, setIsDetailView] = useState(false);
+  const [irMode, setIRMode] = useState<IRMode>("none");
+  const irToggleId = useId();
+
+  const viewToggle = (
+    <div className="flex items-center gap-2 justify-end">
+      <span className={`text-xs ${!isDetailView ? "font-semibold text-gray-700" : "text-gray-400"}`}>
+        Synthèse
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isDetailView}
+        onClick={() => setIsDetailView(!isDetailView)}
+        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+          isDetailView ? "bg-blue-500" : "bg-gray-300"
+        }`}
+      >
+        <span
+          className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
+            isDetailView ? "translate-x-4.5" : "translate-x-0.5"
+          }`}
+        />
+      </button>
+      <span className={`text-xs ${isDetailView ? "font-semibold text-gray-700" : "text-gray-400"}`}>
+        Détails
+      </span>
+    </div>
+  );
+
+  function getIRAmount(result: CombinedResult, member: "declarant" | "conjoint"): number | null {
+    if (irMode === "none") return null;
+
+    // Single income: full IR goes to declarant
+    if (!result.socialConjoint) return result.tax.finalTax;
+
+    if (irMode === "foyer") {
+      // Proportional split based on net taxable income
+      const rev1 = result.social.netTaxable;
+      const rev2 = result.socialConjoint.netTaxable;
+      const total = rev1 + rev2;
+      if (total === 0) return 0;
+      const ratio = member === "declarant" ? rev1 / total : rev2 / total;
+      return Math.round(result.tax.finalTax * ratio);
+    }
+
+    return computeIndividualizedIR(result, member);
+  }
+
+  const irControls = (
+    <div className="flex items-center gap-3 text-xs">
+      <div className="flex items-center gap-1.5">
+        <input
+          type="checkbox"
+          id={`${irToggleId}-show-ir`}
+          checked={irMode !== "none"}
+          onChange={(e) => setIRMode(e.target.checked ? "foyer" : "none")}
+          className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <label htmlFor={`${irToggleId}-show-ir`} className="text-gray-600">
+          Inclure l'IR
+        </label>
+      </div>
+      {irMode !== "none" && (
+        <select
+          value={irMode}
+          onChange={(e) => setIRMode(e.target.value as IRMode)}
+          className="rounded border border-gray-300 px-2 py-0.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="foyer">Taux du foyer</option>
+          <option value="individualized">Taux individualisé</option>
+        </select>
+      )}
+    </div>
+  );
+
   if (isCompareMode && result2) {
     return (
       <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          {irControls}
+          {viewToggle}
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <EmployerResultsTable
+            employer={result1.employer}
+            label="Coût employeur — Situation 1"
+            isDetailView={isDetailView}
+          />
+          <EmployerResultsTable
+            employer={result2.employer}
+            label="Coût employeur — Situation 2"
+            isDetailView={isDetailView}
+          />
+        </div>
+        <EmployerComparisonTable
+          employer1={result1.employer}
+          employer2={result2.employer}
+        />
         <div className="grid md:grid-cols-2 gap-6">
           <SalaryResultsTable
             social={result1.social}
-            irAmount={result1.tax.finalTax}
-            label="Situation 1"
+            irAmount={getIRAmount(result1, "declarant")}
+            label="Salaire — Situation 1"
+            isDetailView={isDetailView}
           />
           <SalaryResultsTable
             social={result2.social}
-            irAmount={result2.tax.finalTax}
-            label="Situation 2"
+            irAmount={getIRAmount(result2, "declarant")}
+            label="Salaire — Situation 2"
+            isDetailView={isDetailView}
           />
         </div>
         <SalaryComparisonTable
@@ -180,15 +373,17 @@ function SalaryTab({
           ir2={result2.tax.finalTax}
         />
         <div className="grid md:grid-cols-2 gap-6">
-          <WaterfallChart
+          <StackedCostChart
             social={result1.social}
-            irAmount={result1.tax.finalTax}
-            label="Du brut au net — Situation 1"
+            employer={result1.employer}
+            irAmount={getIRAmount(result1, "declarant") ?? 0}
+            label="Répartition — Situation 1"
           />
-          <WaterfallChart
+          <StackedCostChart
             social={result2.social}
-            irAmount={result2.tax.finalTax}
-            label="Du brut au net — Situation 2"
+            employer={result2.employer}
+            irAmount={getIRAmount(result2, "declarant") ?? 0}
+            label="Répartition — Situation 2"
           />
         </div>
       </div>
@@ -197,15 +392,26 @@ function SalaryTab({
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        {irControls}
+        {viewToggle}
+      </div>
+      <EmployerResultsTable
+        employer={result1.employer}
+        label="Coût employeur"
+        isDetailView={isDetailView}
+      />
       <SalaryResultsTable
         social={result1.social}
-        irAmount={result1.tax.finalTax}
+        irAmount={getIRAmount(result1, "declarant")}
         label="Décomposition du salaire"
+        isDetailView={isDetailView}
       />
-      <WaterfallChart
+      <StackedCostChart
         social={result1.social}
-        irAmount={result1.tax.finalTax}
-        label="Du brut au net"
+        employer={result1.employer}
+        irAmount={getIRAmount(result1, "declarant") ?? 0}
+        label="Répartition du coût"
       />
     </div>
   );

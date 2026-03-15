@@ -1,4 +1,5 @@
 import type { SocialResult } from "../engine";
+import { groupByFamily } from "./contributionFamilies";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("fr-FR", {
@@ -18,17 +19,22 @@ function formatCurrencyInt(value: number): string {
 
 interface SalaryResultsTableProps {
   social: SocialResult;
-  irAmount: number;
+  irAmount: number | null;
   label: string;
+  isDetailView: boolean;
 }
 
 export function SalaryResultsTable({
   social,
   irAmount,
   label,
+  isDetailView,
 }: SalaryResultsTableProps) {
-  const netAfterIR = social.netBeforeIR - irAmount;
-  const monthlyNet = Math.round((netAfterIR / 12) * 100) / 100;
+  const hasIR = irAmount !== null && irAmount > 0;
+  const effectiveIR = irAmount ?? 0;
+  const netAfterIR = social.netBeforeIR - effectiveIR;
+  const monthlyNet = Math.round((hasIR ? netAfterIR : social.netBeforeIR) / 12 * 100) / 100;
+  const families = groupByFamily(social.contributions);
 
   return (
     <div>
@@ -42,20 +48,28 @@ export function SalaryResultsTable({
             </td>
           </tr>
 
-          {/* Contribution lines */}
-          {social.contributions.map((c, i) => (
-            <tr key={i} className="text-gray-400">
-              <td className="py-0.5 px-2 pl-4 text-xs">
-                {c.label}
-                <span className="ml-1 text-gray-300">
-                  ({(c.rate * 100).toFixed(2)} %)
-                </span>
-              </td>
-              <td className="py-0.5 px-2 text-right tabular-nums text-xs">
-                - {formatCurrency(c.amount)}
-              </td>
-            </tr>
-          ))}
+          {isDetailView
+            ? social.contributions.map((c, i) => (
+                <tr key={i} className="text-gray-400">
+                  <td className="py-0.5 px-2 pl-4 text-xs">
+                    {c.label}
+                    <span className="ml-1 text-gray-300">
+                      ({(c.rate * 100).toFixed(2)} %)
+                    </span>
+                  </td>
+                  <td className="py-0.5 px-2 text-right tabular-nums text-xs">
+                    - {formatCurrency(c.amount)}
+                  </td>
+                </tr>
+              ))
+            : families.map((f) => (
+                <tr key={f.name} className="text-gray-400">
+                  <td className="py-0.5 px-2 pl-4 text-xs">{f.name}</td>
+                  <td className="py-0.5 px-2 text-right tabular-nums text-xs">
+                    - {formatCurrency(f.amount)}
+                  </td>
+                </tr>
+              ))}
 
           <tr className="border-t border-gray-100">
             <td className="py-1 px-2 text-gray-600 text-sm">
@@ -70,7 +84,7 @@ export function SalaryResultsTable({
             <tr className="text-green-600">
               <td className="py-0.5 px-2 text-sm">
                 Réduction HS
-                {social.overtimeIRExemption > 0 && (
+                {isDetailView && social.overtimeIRExemption > 0 && (
                   <span className="text-xs text-green-500 ml-1">
                     (économie IR : {formatCurrency(social.overtimeIRExemption)})
                   </span>
@@ -91,76 +105,96 @@ export function SalaryResultsTable({
             </tr>
           )}
 
-          <tr className="font-semibold bg-gray-50 border-t border-gray-200">
+          <tr className={`font-semibold border-t border-gray-200 ${hasIR ? "bg-gray-50" : "bg-blue-50"}`}>
             <td className="py-1.5 px-2">Net avant impôt</td>
             <td className="py-1.5 px-2 text-right tabular-nums">
               {formatCurrencyInt(social.netBeforeIR)}
             </td>
           </tr>
 
-          <tr>
-            <td className="py-1 px-2 text-gray-600">
-              Net imposable
-              {social.overtimeIRExemption > 0 && (
-                <span className="text-xs text-gray-400 ml-1">
-                  (exo HS : {formatCurrency(social.overtimeIRExemption)})
-                </span>
-              )}
-            </td>
-            <td className="py-1 px-2 text-right tabular-nums">
-              {formatCurrencyInt(social.netTaxable)}
-            </td>
-          </tr>
-
-          <tr>
-            <td className="py-1 px-2 text-gray-600">Impôt sur le revenu</td>
-            <td className="py-1 px-2 text-right tabular-nums">
-              - {formatCurrencyInt(irAmount)}
-            </td>
-          </tr>
-
-          <tr className="font-semibold bg-blue-50 border-t border-gray-200">
-            <td className="py-1.5 px-2">Net après impôt</td>
-            <td className="py-1.5 px-2 text-right tabular-nums">
-              {formatCurrencyInt(netAfterIR)}
-            </td>
-          </tr>
-
-          <tr className="bg-blue-50">
-            <td className="py-1.5 px-2 text-sm">Net mensuel</td>
-            <td className="py-1.5 px-2 text-right tabular-nums text-sm">
-              {formatCurrency(monthlyNet)} /mois
-            </td>
-          </tr>
-
-          {/* Rates summary */}
-          <tr className="border-t border-gray-100">
-            <td className="py-1 px-2 text-gray-500 text-xs">Taux de cotisations</td>
-            <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
-              {social.contributionRate.toFixed(1)} %
-            </td>
-          </tr>
-          {social.grossSalary > 0 && (
-            <tr>
-              <td className="py-1 px-2 text-gray-500 text-xs">Taux effectif IR</td>
-              <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
-                {(irAmount / social.grossSalary * 100).toFixed(1)} %
+          {!hasIR && (
+            <tr className="bg-blue-50">
+              <td className="py-1.5 px-2 text-sm">Net mensuel</td>
+              <td className="py-1.5 px-2 text-right tabular-nums text-sm">
+                {formatCurrency(monthlyNet)} /mois
               </td>
             </tr>
           )}
-          <tr>
-            <td className="py-1 px-2 text-gray-500 text-xs">Taux global de prélèvement</td>
-            <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
-              {social.grossSalary > 0
-                ? ((social.grossSalary - netAfterIR) / social.grossSalary * 100).toFixed(1)
-                : "0.0"} %
-            </td>
-          </tr>
+
+          {hasIR && (
+            <>
+              {isDetailView && (
+                <tr>
+                  <td className="py-1 px-2 text-gray-600">
+                    Net imposable
+                    {social.overtimeIRExemption > 0 && (
+                      <span className="text-xs text-gray-400 ml-1">
+                        (exo HS : {formatCurrency(social.overtimeIRExemption)})
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-1 px-2 text-right tabular-nums">
+                    {formatCurrencyInt(social.netTaxable)}
+                  </td>
+                </tr>
+              )}
+
+              <tr>
+                <td className="py-1 px-2 text-gray-600">Impôt sur le revenu</td>
+                <td className="py-1 px-2 text-right tabular-nums">
+                  - {formatCurrencyInt(effectiveIR)}
+                </td>
+              </tr>
+
+              <tr className="font-semibold bg-blue-50 border-t border-gray-200">
+                <td className="py-1.5 px-2">Net après impôt</td>
+                <td className="py-1.5 px-2 text-right tabular-nums">
+                  {formatCurrencyInt(netAfterIR)}
+                </td>
+              </tr>
+
+              <tr className="bg-blue-50">
+                <td className="py-1.5 px-2 text-sm">Net mensuel</td>
+                <td className="py-1.5 px-2 text-right tabular-nums text-sm">
+                  {formatCurrency(monthlyNet)} /mois
+                </td>
+              </tr>
+            </>
+          )}
+
+          {isDetailView && (
+            <>
+              <tr className="border-t border-gray-100">
+                <td className="py-1 px-2 text-gray-500 text-xs">Taux de cotisations</td>
+                <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+                  {social.contributionRate.toFixed(1)} %
+                </td>
+              </tr>
+              {hasIR && social.grossSalary > 0 && (
+                <>
+                  <tr>
+                    <td className="py-1 px-2 text-gray-500 text-xs">Taux effectif IR</td>
+                    <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+                      {(effectiveIR / social.grossSalary * 100).toFixed(1)} %
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 px-2 text-gray-500 text-xs">Taux global de prélèvement</td>
+                    <td className="py-1 px-2 text-right tabular-nums text-xs text-gray-500">
+                      {((social.grossSalary - netAfterIR) / social.grossSalary * 100).toFixed(1)} %
+                    </td>
+                  </tr>
+                </>
+              )}
+            </>
+          )}
         </tbody>
       </table>
-      <p className="text-xs text-gray-400 mt-2 px-2">
-        PASS 2026 : 48 060 € — Barème cotisations 2026
-      </p>
+      {isDetailView && (
+        <p className="text-xs text-gray-400 mt-2 px-2">
+          PASS 2026 : 48 060 € — Barème cotisations 2026
+        </p>
+      )}
     </div>
   );
 }

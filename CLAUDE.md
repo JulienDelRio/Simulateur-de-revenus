@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Static website to estimate net income from gross revenue (chiffre d'affaires → revenus nets). Targeted at French freelancers/entrepreneurs to simulate taxes, social contributions, and net take-home pay. Hosted on **GitHub Pages**.
+Static website to simulate net income for French workers. Covers the full chain: employer cost (super brut) → gross salary → social contributions → net before tax → income tax → net take-home pay. Hosted on **GitHub Pages**.
 
 - **License**: MIT
-- **Status**: Early stage
+- **Status**: v0.3 (employer cost / super brut)
 
 ## Language Conventions
 
