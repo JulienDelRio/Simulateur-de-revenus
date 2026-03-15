@@ -210,17 +210,48 @@ function SalaryTab({
   result2: CombinedResult | null;
   isCompareMode: boolean;
 }) {
+  const [isDetailView, setIsDetailView] = useState(false);
+
+  const viewToggle = (
+    <div className="flex items-center gap-2 justify-end">
+      <span className={`text-xs ${!isDetailView ? "font-semibold text-gray-700" : "text-gray-400"}`}>
+        Synthèse
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isDetailView}
+        onClick={() => setIsDetailView(!isDetailView)}
+        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+          isDetailView ? "bg-blue-500" : "bg-gray-300"
+        }`}
+      >
+        <span
+          className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
+            isDetailView ? "translate-x-4.5" : "translate-x-0.5"
+          }`}
+        />
+      </button>
+      <span className={`text-xs ${isDetailView ? "font-semibold text-gray-700" : "text-gray-400"}`}>
+        Détails
+      </span>
+    </div>
+  );
+
   if (isCompareMode && result2) {
     return (
       <div className="space-y-6">
+        {viewToggle}
         <div className="grid md:grid-cols-2 gap-6">
           <EmployerResultsTable
             employer={result1.employer}
             label="Coût employeur — Situation 1"
+            isDetailView={isDetailView}
           />
           <EmployerResultsTable
             employer={result2.employer}
             label="Coût employeur — Situation 2"
+            isDetailView={isDetailView}
           />
         </div>
         <div className="grid md:grid-cols-2 gap-6">
@@ -228,11 +259,13 @@ function SalaryTab({
             social={result1.social}
             irAmount={result1.tax.finalTax}
             label="Salaire — Situation 1"
+            isDetailView={isDetailView}
           />
           <SalaryResultsTable
             social={result2.social}
             irAmount={result2.tax.finalTax}
             label="Salaire — Situation 2"
+            isDetailView={isDetailView}
           />
         </div>
         <SalaryComparisonTable
@@ -259,14 +292,17 @@ function SalaryTab({
 
   return (
     <div className="space-y-6">
+      {viewToggle}
       <EmployerResultsTable
         employer={result1.employer}
         label="Coût employeur"
+        isDetailView={isDetailView}
       />
       <SalaryResultsTable
         social={result1.social}
         irAmount={result1.tax.finalTax}
         label="Décomposition du salaire"
+        isDetailView={isDetailView}
       />
       <WaterfallChart
         social={result1.social}
