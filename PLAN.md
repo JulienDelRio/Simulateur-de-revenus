@@ -1,91 +1,95 @@
-# PLAN.md — v0.1 Simulateur d'impôt sur le revenu
+# PLAN.md — Simulateur de revenus
 
 ## Architecture
 
 ```
 src/
-  engine/           # Moteur de calcul fiscal (TypeScript pur, zero dépendance UI)
-  components/       # Composants React (formulaires, résultats, graphiques)
-  layouts/          # Layout Astro
-  pages/            # Page unique index.astro
-  styles/           # Tailwind global.css
+  engine/
+    simulate.ts          # Moteur IR (barème, QF, décote, plafonnement)
+    deduction.ts         # Abattement 10% / frais réels
+    parts.ts             # Quotient familial
+    tax.ts               # Calcul par tranche
+    constants.ts         # Barème IR 2026
+    types.ts             # TaxInput, TaxResult, MemberIncome
+    social/              # v0.2 — Cotisations salariales
+      simulate.ts        # simulateSocial() → brut → net avant IR
+      constants.ts       # PASS, CSG/CRDS, Agirc-Arrco
+      types.ts           # SocialInput, SocialResult
+    employer/            # v0.3 — Cotisations patronales + RGDU
+      simulate.ts        # simulateEmployer() → super brut
+      rgdu.ts            # Réduction générale dégressive unique
+      constants.ts       # Taux patronaux, SMIC, paramètres RGDU
+      types.ts           # EmployerInput, EmployerResult, CompanySize
+    combined.ts          # simulateCombined() → chaîne complète
+    index.ts             # Exports
+  components/
+    SimulatorApp.tsx     # Composant racine, onglets, state
+    useUrlState.ts       # État URL (ScenarioState ↔ query string)
+    FamilyForm.tsx       # Situation familiale
+    ScenarioForm.tsx     # Revenus (brut, abattement)
+    SalaryForm.tsx       # Statut salarié (cadre, HS, mutuelle)
+    EmployerForm.tsx     # Paramètres employeur (effectif, AT/MP, transport, prévoyance)
+    TabNav.tsx           # Navigation par onglets
+    ResultsTable.tsx     # Résultats IR + comparaison
+    SalaryResultsTable.tsx   # Décomposition salaire + comparaison
+    EmployerResultsTable.tsx # Coût employeur + comparaison
+    StackedCostChart.tsx     # Barres empilées super brut → net
+    BreakdownChart.tsx       # Barres empilées IR (net vs impôt)
+    EffectiveRateChart.tsx   # Courbe taux effectif IR
+    TaxBracketsTable.tsx     # Tableau des tranches IR
+    contributionFamilies.ts  # Regroupement cotisations par finalité
+  layouts/
+  pages/
+  styles/
 tests/
-  engine/           # Tests unitaires du moteur fiscal
-.github/
-  workflows/        # CI/CD GitHub Pages
+  engine/
+    simulate.test.ts     # 14 tests IR
+    social.test.ts       # 7 tests cotisations salariales
+    employer.test.ts     # 7 tests cotisations patronales
+    combined.test.ts     # 4 tests chaîne complète
 ```
 
-Stack : **Astro + React + Recharts + Tailwind + TypeScript**
+Stack : **Astro 6 + React 19 + Recharts + Tailwind v4 + TypeScript + Vitest**
 
 ---
 
-## Phase 1 — Initialisation du projet
+## Versions
 
-| # | Tâche | Statut | Fichiers |
-|---|-------|--------|----------|
-| T1 | Scaffolding Astro + React + Tailwind + Recharts | ✅ | `package.json`, `astro.config.mjs`, `tsconfig.json`, `src/styles/global.css`, `src/pages/index.astro`, `src/layouts/Layout.astro` |
-| T2 | GitHub Actions pour GitHub Pages | ✅ | `.github/workflows/deploy.yml` |
-| T3 | Configuration Vitest | ✅ | `vitest.config.ts`, `package.json` |
+### v0.1 — Impôt sur le revenu ✅
 
-## Phase 2 — Moteur de calcul fiscal
+Barème IR 2026, quotient familial, décote, plafonnement QF, seuil 61 €.
+Comparaison deux situations. Graphiques (barres empilées, courbe taux effectif).
 
-| # | Tâche | Statut | Fichiers | Règles métier |
-|---|-------|--------|----------|---------------|
-| T4 | Types + constantes barème 2026 | ✅ | `src/engine/types.ts`, `src/engine/constants.ts` | — |
-| T5 | Calcul abattement | ✅ | `src/engine/deduction.ts` | RM-001 → RM-004 |
-| T6 | Calcul nombre de parts (QF) | ✅ | `src/engine/parts.ts` | RM-005 → RM-009 |
-| T7 | Calcul IR (barème, plafonnement, décote, seuil) | ✅ | `src/engine/tax.ts` | RM-010 → RM-018 |
-| T8 | Orchestrateur simulate() + résultats | ✅ | `src/engine/simulate.ts`, `src/engine/index.ts` | RM-019 → RM-021 |
-| T9 | Tests (4 cas spec + edge cases) | ✅ | `tests/engine/simulate.test.ts` (12 tests) | Tous |
+### v0.2 — Cotisations sociales salarié ✅
 
-## Phase 3 — Interface utilisateur
+Brut → net avant IR. Vieillesse, Agirc-Arrco, CSG/CRDS, heures sup, mutuelle.
+Navigation par onglets (Situation / Salaire / IR).
 
-| # | Tâche | Statut | Fichiers |
-|---|-------|--------|----------|
-| T10 | Formulaire situation familiale | ⬜ | `src/components/FamilyForm.tsx` |
-| T11 | Formulaire scénario (actuel/futur) | ⬜ | `src/components/ScenarioForm.tsx` |
-| T12 | Composant racine + état global | ⬜ | `src/components/SimulatorApp.tsx` |
-| T13 | Tableaux résultats + comparaison | ⬜ | `src/components/ResultsTable.tsx`, `src/components/ComparisonTable.tsx` |
-| T14 | Graphique barres empilées | ⬜ | `src/components/BreakdownChart.tsx` |
-| T15 | Courbe taux effectif | ⬜ | `src/components/EffectiveTaxRateChart.tsx` |
+### v0.3 — Super brut / coût employeur 🚧
 
-## Phase 4 — Intégration et polish
+Cotisations patronales (25 règles métier RM-200 à RM-225).
+RGDU (ex-Fillon) avec formule dégressive P=1,75.
+Paramètres employeur ajustables (effectif, AT/MP, transport, prévoyance).
+Vue synthèse/détails. Graphique barres empilées 7 colonnes.
+Option IR avec taux foyer ou individualisé (formule BOFIP).
 
-| # | Tâche | Statut | Fichiers |
-|---|-------|--------|----------|
-| T16 | Page Astro + SEO + disclaimer | ⬜ | `src/pages/index.astro`, `src/layouts/Layout.astro` |
-| T17 | Responsive mobile-first | ⬜ | tous les `.tsx` |
-| T18 | Mise à jour README | ⬜ | `README.md` |
+### v0.4 — Micro-entrepreneur (à venir)
+
+Cotisations forfaitaires, abattement IR par activité, versement libératoire, ACRE.
+
+### v0.5+ — Roadmap
+
+Comparaison multi-statuts, comparaison de foyers, PAS, CFE/TVA.
 
 ---
 
-## Dépendances
+## Tests
 
-```
-T1 ──> T2, T3, T4, T5, T9, T10
-T4 + T5 ──> T6, T7
-T6 + T7 ──> T8
-T8 + T9 + T10 ──> T11
-T11 ──> T12, T13, T14
-T12-T14 ──> T15, T16
-T8 ──> T17 (parallélisable avec Phase 3)
-T18 : indépendant
-```
+32 tests au total :
+- `npx vitest run` — tous doivent passer
+- `npm run build` — build statique OK
 
-## Pièges identifiés
+## Déploiement
 
-1. **Précision float64** — pas d'arrondi prématuré, la troncature finale (RM-018) absorbe les erreurs
-2. **TMI après plafonnement QF** (RM-019) — calculer sur parts de base, pas parts réelles
-3. **Parent isolé** (RM-013) — plafond QF 4 262 € pour la 1re demi-part (pas 1 807 €)
-4. **Veuf avec enfants** (RM-008) — même régime que couple (2 parts de base)
-5. **Décote** (RM-016) — seuls couples mariés/pacsés en déclaration commune = décote couple
-6. **GitHub Pages base path** — `base: '/Simulateur-de-revenus'` dans `astro.config.mjs`
-
-## Cas de test de référence (spec v0.1)
-
-| Cas | Situation | Revenu | IR attendu | Net attendu |
-|-----|-----------|--------|------------|-------------|
-| 1 | Célibataire, 0 enfant | 30 000 € | 1 563 € | 28 437 € |
-| 2 | Couple marié, 2 enfants | 80 000 € | 4 193 € | 75 807 € |
-| 3 | Célibataire, 13 000 € | 13 000 € | 0 € | 13 000 € |
-| 4 | Parent isolé, 1 enfant | 60 000 € | 3 388 € | 56 612 € |
+GitHub Pages via GitHub Actions (push sur `main`).
+CI : build + tests sur PRs vers `main`/`develop`.
