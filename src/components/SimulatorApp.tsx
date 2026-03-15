@@ -1,25 +1,43 @@
-import { useMemo } from "react";
-import { simulate } from "../engine";
-import type { TaxInput } from "../engine";
+import { useState, useMemo } from "react";
+import { simulateCombined } from "../engine";
+import type { CombinedInput, CombinedResult } from "../engine";
 import { FamilyForm } from "./FamilyForm";
 import { ScenarioForm } from "./ScenarioForm";
+import { SalaryForm } from "./SalaryForm";
 import { ResultsTable, ComparisonTable } from "./ResultsTable";
+import { SalaryResultsTable, SalaryComparisonTable } from "./SalaryResultsTable";
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
+import { WaterfallChart } from "./ContributionsChart";
+import { TabNav } from "./TabNav";
 import { useUrlState } from "./useUrlState";
 import type { ScenarioState } from "./useUrlState";
 
-function buildInput(s: ScenarioState): TaxInput {
+const TABS = [
+  { id: "situation", label: "Situation" },
+  { id: "salaire", label: "Salaire" },
+  { id: "ir", label: "Impôt sur le revenu" },
+];
+
+function buildCombinedInput(s: ScenarioState): CombinedInput {
   return {
     declarant: {
-      grossIncome: s.grossIncome,
+      grossSalary: s.grossIncome,
+      isCadre: s.isCadre,
+      overtimeGross: s.overtimeGross,
+      hasMutuelle: s.hasMutuelle,
+      mutuelleMonthly: s.mutuelleMonthly,
       deductionMode: s.deductionMode,
       realExpenses: s.realExpenses,
     },
     conjoint: s.isSeparateIncome
       ? {
-          grossIncome: s.grossIncomeConjoint,
+          grossSalary: s.grossIncomeConjoint,
+          isCadre: s.isCadreConjoint,
+          overtimeGross: s.overtimeGrossConjoint,
+          hasMutuelle: s.hasMutuelleConjoint,
+          mutuelleMonthly: s.mutuelleMonthlyConjoint,
           deductionMode: s.deductionModeConjoint,
           realExpenses: s.realExpensesConjoint,
         }
@@ -31,7 +49,7 @@ function buildInput(s: ScenarioState): TaxInput {
   };
 }
 
-function ScenarioBlock({
+function SituationBlock({
   label,
   scenario,
   onChange,
@@ -43,48 +61,234 @@ function ScenarioBlock({
   return (
     <div className="rounded-lg border border-gray-200 p-4">
       <h2 className="text-lg font-bold text-gray-800 mb-4">{label}</h2>
-      <div className="grid md:grid-cols-2 gap-6">
-      <FamilyForm
-        familyStatus={scenario.familyStatus}
-        isJointDeclaration={scenario.isJointDeclaration}
-        childrenCount={scenario.childrenCount}
-        isLoneParent={scenario.isLoneParent}
-        isSeparateIncome={scenario.isSeparateIncome}
-        onChange={(v) =>
-          onChange({
-            ...scenario,
-            familyStatus: v.familyStatus,
-            isJointDeclaration: v.isJointDeclaration,
-            childrenCount: v.childrenCount,
-            isLoneParent: v.isLoneParent,
-            isSeparateIncome: v.isSeparateIncome,
-          })
-        }
-      />
-      <ScenarioForm
-        label="Revenus"
-        data={{
-          grossIncome: scenario.grossIncome,
-          deductionMode: scenario.deductionMode,
-          realExpenses: scenario.realExpenses,
-          grossIncomeConjoint: scenario.grossIncomeConjoint,
-          deductionModeConjoint: scenario.deductionModeConjoint,
-          realExpensesConjoint: scenario.realExpensesConjoint,
-        }}
-        isSeparateIncome={scenario.isSeparateIncome}
-        onChange={(data) =>
-          onChange({
-            ...scenario,
-            grossIncome: data.grossIncome,
-            deductionMode: data.deductionMode,
-            realExpenses: data.realExpenses,
-            grossIncomeConjoint: data.grossIncomeConjoint,
-            deductionModeConjoint: data.deductionModeConjoint,
-            realExpensesConjoint: data.realExpensesConjoint,
-          })
-        }
-      />
+      <div className="grid md:grid-cols-3 gap-6">
+        <FamilyForm
+          familyStatus={scenario.familyStatus}
+          isJointDeclaration={scenario.isJointDeclaration}
+          childrenCount={scenario.childrenCount}
+          isLoneParent={scenario.isLoneParent}
+          isSeparateIncome={scenario.isSeparateIncome}
+          onChange={(v) =>
+            onChange({
+              ...scenario,
+              familyStatus: v.familyStatus,
+              isJointDeclaration: v.isJointDeclaration,
+              childrenCount: v.childrenCount,
+              isLoneParent: v.isLoneParent,
+              isSeparateIncome: v.isSeparateIncome,
+            })
+          }
+        />
+        <ScenarioForm
+          label="Revenus"
+          data={{
+            grossIncome: scenario.grossIncome,
+            deductionMode: scenario.deductionMode,
+            realExpenses: scenario.realExpenses,
+            grossIncomeConjoint: scenario.grossIncomeConjoint,
+            deductionModeConjoint: scenario.deductionModeConjoint,
+            realExpensesConjoint: scenario.realExpensesConjoint,
+          }}
+          isSeparateIncome={scenario.isSeparateIncome}
+          onChange={(data) =>
+            onChange({
+              ...scenario,
+              grossIncome: data.grossIncome,
+              deductionMode: data.deductionMode,
+              realExpenses: data.realExpenses,
+              grossIncomeConjoint: data.grossIncomeConjoint,
+              deductionModeConjoint: data.deductionModeConjoint,
+              realExpensesConjoint: data.realExpensesConjoint,
+            })
+          }
+        />
+        <div className="space-y-4">
+          <SalaryForm
+            data={{
+              isCadre: scenario.isCadre,
+              overtimeGross: scenario.overtimeGross,
+              hasMutuelle: scenario.hasMutuelle,
+              mutuelleMonthly: scenario.mutuelleMonthly,
+            }}
+            onChange={(data) =>
+              onChange({
+                ...scenario,
+                isCadre: data.isCadre,
+                overtimeGross: data.overtimeGross,
+                hasMutuelle: data.hasMutuelle,
+                mutuelleMonthly: data.mutuelleMonthly,
+              })
+            }
+          />
+          {scenario.isSeparateIncome && (
+            <>
+              <hr className="border-gray-200" />
+              <p className="text-sm font-medium text-gray-500">Conjoint</p>
+              <SalaryForm
+                data={{
+                  isCadre: scenario.isCadreConjoint,
+                  overtimeGross: scenario.overtimeGrossConjoint,
+                  hasMutuelle: scenario.hasMutuelleConjoint,
+                  mutuelleMonthly: scenario.mutuelleMonthlyConjoint,
+                }}
+                onChange={(data) =>
+                  onChange({
+                    ...scenario,
+                    isCadreConjoint: data.isCadre,
+                    overtimeGrossConjoint: data.overtimeGross,
+                    hasMutuelleConjoint: data.hasMutuelle,
+                    mutuelleMonthlyConjoint: data.mutuelleMonthly,
+                  })
+                }
+              />
+            </>
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function SalaryTab({
+  result1,
+  result2,
+  isCompareMode,
+}: {
+  result1: CombinedResult;
+  result2: CombinedResult | null;
+  isCompareMode: boolean;
+}) {
+  if (isCompareMode && result2) {
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          <SalaryResultsTable
+            social={result1.social}
+            irAmount={result1.tax.finalTax}
+            label="Situation 1"
+          />
+          <SalaryResultsTable
+            social={result2.social}
+            irAmount={result2.tax.finalTax}
+            label="Situation 2"
+          />
+        </div>
+        <SalaryComparisonTable
+          social1={result1.social}
+          social2={result2.social}
+          ir1={result1.tax.finalTax}
+          ir2={result2.tax.finalTax}
+        />
+        <div className="grid md:grid-cols-2 gap-6">
+          <WaterfallChart
+            social={result1.social}
+            irAmount={result1.tax.finalTax}
+            label="Du brut au net — Situation 1"
+          />
+          <WaterfallChart
+            social={result2.social}
+            irAmount={result2.tax.finalTax}
+            label="Du brut au net — Situation 2"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <SalaryResultsTable
+        social={result1.social}
+        irAmount={result1.tax.finalTax}
+        label="Décomposition du salaire"
+      />
+      <WaterfallChart
+        social={result1.social}
+        irAmount={result1.tax.finalTax}
+        label="Du brut au net"
+      />
+    </div>
+  );
+}
+
+function IRTab({
+  result1,
+  result2,
+  input1,
+  input2,
+  isCompareMode,
+}: {
+  result1: CombinedResult;
+  result2: CombinedResult | null;
+  input1: CombinedInput;
+  input2: CombinedInput | null;
+  isCompareMode: boolean;
+}) {
+  const taxInput1 = {
+    declarant: {
+      grossIncome: result1.social.netTaxable,
+      deductionMode: input1.declarant.deductionMode,
+      realExpenses: input1.declarant.realExpenses,
+    },
+    conjoint: result1.socialConjoint
+      ? {
+          grossIncome: result1.socialConjoint.netTaxable,
+          deductionMode: input1.conjoint!.deductionMode,
+          realExpenses: input1.conjoint!.realExpenses,
+        }
+      : null,
+    familyStatus: input1.familyStatus,
+    isJointDeclaration: input1.isJointDeclaration,
+    childrenCount: input1.childrenCount,
+    isLoneParent: input1.isLoneParent,
+  };
+
+  const taxInput2 = result2 && input2
+    ? {
+        declarant: {
+          grossIncome: result2.social.netTaxable,
+          deductionMode: input2.declarant.deductionMode,
+          realExpenses: input2.declarant.realExpenses,
+        },
+        conjoint: result2.socialConjoint
+          ? {
+              grossIncome: result2.socialConjoint.netTaxable,
+              deductionMode: input2.conjoint!.deductionMode,
+              realExpenses: input2.conjoint!.realExpenses,
+            }
+          : null,
+        familyStatus: input2.familyStatus,
+        isJointDeclaration: input2.isJointDeclaration,
+        childrenCount: input2.childrenCount,
+        isLoneParent: input2.isLoneParent,
+      }
+    : null;
+
+  return (
+    <div className="space-y-6">
+      {isCompareMode && result2 ? (
+        <>
+          <div className="grid md:grid-cols-2 gap-6">
+            <ResultsTable result={result1.tax} label="Situation 1" />
+            <ResultsTable result={result2.tax} label="Situation 2" />
+          </div>
+          <ComparisonTable current={result1.tax} future={result2.tax} />
+        </>
+      ) : (
+        <ResultsTable result={result1.tax} label="Résultat IR" />
+      )}
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <BreakdownChart current={result1.tax} future={result2?.tax ?? null} />
+        <EffectiveRateChart
+          baseInput={taxInput1}
+          currentResult={result1.tax}
+          futureInput={taxInput2}
+          futureResult={result2?.tax ?? null}
+        />
+      </div>
+
+      <TaxBracketsTable />
     </div>
   );
 }
@@ -92,37 +296,35 @@ function ScenarioBlock({
 export function SimulatorApp() {
   const { state, update } = useUrlState();
   const { isCompareMode, current, future } = state;
+  const [activeTab, setActiveTab] = useState("situation");
 
-  const currentInput = useMemo(() => buildInput(current), [current]);
-  const futureInput = useMemo(() => buildInput(future), [future]);
+  const input1 = useMemo(() => buildCombinedInput(current), [current]);
+  const input2 = useMemo(() => buildCombinedInput(future), [future]);
 
-  const currentResult = useMemo(() => simulate(currentInput), [currentInput]);
-  const futureResult = useMemo(
-    () => (isCompareMode ? simulate(futureInput) : null),
-    [isCompareMode, futureInput],
+  const result1 = useMemo(() => simulateCombined(input1), [input1]);
+  const result2 = useMemo(
+    () => (isCompareMode ? simulateCombined(input2) : null),
+    [isCompareMode, input2],
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <header>
         <h1 className="text-2xl font-bold text-gray-900">
-          Simulateur d'impôt sur le revenu
+          Simulateur de revenus
         </h1>
         <p className="text-sm text-gray-500 mt-1">
           Barème 2026 (revenus 2025) — Estimation indicative
         </p>
       </header>
 
-      {/* Compare toggle */}
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
           id="compare-mode"
           checked={isCompareMode}
           onChange={(e) => {
-            const checked = e.target.checked;
-            if (checked) {
-              // Clone current scenario into future
+            if (e.target.checked) {
               update({ isCompareMode: true, future: { ...current } });
             } else {
               update({ isCompareMode: false });
@@ -135,59 +337,41 @@ export function SimulatorApp() {
         </label>
       </div>
 
-      {/* Forms */}
-      <ScenarioBlock
-        label={isCompareMode ? "Situation 1" : "Ma situation"}
-        scenario={current}
-        onChange={(s) => update({ current: s })}
-      />
+      <TabNav tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {isCompareMode && (
-        <ScenarioBlock
-          label="Situation 2"
-          scenario={future}
-          onChange={(s) => update({ future: s })}
-        />
-      )}
-
-      {/* Results */}
-      <section className="space-y-6 pt-4 border-t border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900">Résultats</h2>
-
-        {isCompareMode && futureResult ? (
-          <>
-            <div className="grid md:grid-cols-2 gap-6">
-              <ResultsTable result={currentResult} label="Situation 1" />
-              <ResultsTable result={futureResult} label="Situation 2" />
-            </div>
-            <ComparisonTable current={currentResult} future={futureResult} />
-          </>
-        ) : (
-          <ResultsTable result={currentResult} label="Résultat" />
+      <div role="tabpanel">
+        {activeTab === "situation" && (
+          <div className="space-y-6">
+            <SituationBlock
+              label={isCompareMode ? "Situation 1" : "Ma situation"}
+              scenario={current}
+              onChange={(s) => update({ current: s })}
+            />
+            {isCompareMode && (
+              <SituationBlock
+                label="Situation 2"
+                scenario={future}
+                onChange={(s) => update({ future: s })}
+              />
+            )}
+          </div>
         )}
-      </section>
 
-      {/* Charts */}
-      <section className="space-y-6 pt-4 border-t border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900">Graphiques</h2>
+        {activeTab === "salaire" && (
+          <SalaryTab result1={result1} result2={result2} isCompareMode={isCompareMode} />
+        )}
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <BreakdownChart current={currentResult} future={futureResult} />
-          <EffectiveRateChart
-            baseInput={currentInput}
-            currentResult={currentResult}
-            futureInput={isCompareMode ? futureInput : null}
-            futureResult={futureResult}
+        {activeTab === "ir" && (
+          <IRTab
+            result1={result1}
+            result2={result2}
+            input1={input1}
+            input2={isCompareMode ? input2 : null}
+            isCompareMode={isCompareMode}
           />
-        </div>
-      </section>
+        )}
+      </div>
 
-      {/* Tax brackets reference */}
-      <section className="pt-4 border-t border-gray-200">
-        <TaxBracketsTable />
-      </section>
-
-      {/* Disclaimer */}
       <footer className="text-xs text-gray-400 pt-4 border-t border-gray-100">
         <p>
           Ce simulateur fournit une estimation indicative. Les résultats ne

@@ -27,13 +27,33 @@ interface CurvePoint {
   marker2?: boolean;
 }
 
+function scaleInput(input: TaxInput, totalIncome: number): TaxInput {
+  const originalTotal =
+    input.declarant.grossIncome + (input.conjoint?.grossIncome ?? 0);
+  const ratio = originalTotal > 0 ? totalIncome / originalTotal : 1;
+
+  return {
+    declarant: { ...input.declarant, grossIncome: input.declarant.grossIncome * ratio },
+    conjoint: input.conjoint
+      ? { ...input.conjoint, grossIncome: input.conjoint.grossIncome * ratio }
+      : null,
+    familyStatus: input.familyStatus,
+    isJointDeclaration: input.isJointDeclaration,
+    childrenCount: input.childrenCount,
+    isLoneParent: input.isLoneParent,
+  };
+}
+
 function buildCurveData(
   input1: TaxInput,
+  result1: TaxResult,
   input2: TaxInput | null,
-  income1: number,
-  income2: number | null,
+  result2: TaxResult | null,
   maxIncome: number,
 ): CurvePoint[] {
+  const income1 = result1.grossIncome;
+  const income2 = result2?.grossIncome ?? null;
+
   const step = Math.max(1_000, Math.round(maxIncome / 100 / 1_000) * 1_000);
 
   const incomes = new Set<number>();
@@ -46,28 +66,24 @@ function buildCurveData(
   const sorted = [...incomes].sort((a, b) => a - b);
 
   return sorted.map((income) => {
-    const r1 = simulate({
-      ...input1,
-      declarant: { ...input1.declarant, grossIncome: income },
-      conjoint: input1.conjoint ? { ...input1.conjoint } : null,
-    });
+    const isMarker1 = income === income1;
+    const isMarker2 = income2 !== null && income === income2;
+
+    // For marker points, use actual results instead of recalculating
+    const r1 = isMarker1 ? result1 : simulate(scaleInput(input1, income));
 
     const point: CurvePoint = {
       income,
       rate1: r1.effectiveRate,
       tax1: r1.finalTax,
-      marker1: income === income1 ? true : undefined,
+      marker1: isMarker1 ? true : undefined,
     };
 
-    if (input2) {
-      const r2 = simulate({
-        ...input2,
-        declarant: { ...input2.declarant, grossIncome: income },
-        conjoint: input2.conjoint ? { ...input2.conjoint } : null,
-      });
+    if (input2 && result2) {
+      const r2 = isMarker2 ? result2 : simulate(scaleInput(input2, income));
       point.rate2 = r2.effectiveRate;
       point.tax2 = r2.finalTax;
-      point.marker2 = income2 !== null && income === income2 ? true : undefined;
+      point.marker2 = isMarker2 ? true : undefined;
     }
 
     return point;
@@ -143,9 +159,9 @@ export function EffectiveRateChart({
 
   const curveData = buildCurveData(
     baseInput,
+    currentResult,
     futureInput,
-    currentResult.grossIncome,
-    futureResult?.grossIncome ?? null,
+    futureResult,
     maxX,
   );
 
@@ -154,16 +170,16 @@ export function EffectiveRateChart({
   return (
     <div>
       <h3 className="text-md font-semibold text-gray-700 mb-2">
-        Taux effectif d'imposition
+        Taux effectif IR (sur le revenu brut)
       </h3>
       <div style={{ width: "100%", height: 280 }}>
         <ResponsiveContainer>
-          <LineChart data={curveData}>
+          <LineChart data={curveData} margin={{ left: 5, right: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="income"
               type="number"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(v) =>
                 v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v.toString()
               }
@@ -171,24 +187,27 @@ export function EffectiveRateChart({
                 value: "Revenu brut (€)",
                 position: "insideBottom",
                 offset: -5,
-                fontSize: 11,
+                fontSize: 10,
               }}
               domain={[0, maxX]}
             />
             <YAxis
               yAxisId="rate"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(v) => `${v.toFixed(0)}%`}
               domain={[0, "auto"]}
+              width={35}
             />
             <YAxis
               yAxisId="tax"
               orientation="right"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(v) =>
-                v >= 1000 ? `${(v / 1000).toFixed(0)}k €` : `${v} €`
+                v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`
               }
               domain={[0, "auto"]}
+              width={40}
+              unit=" €"
             />
             <Tooltip content={<CustomTooltip />} />
 

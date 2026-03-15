@@ -13,6 +13,15 @@ export interface ScenarioState {
   grossIncomeConjoint: number;
   deductionModeConjoint: DeductionMode;
   realExpensesConjoint: number;
+  // v0.2 salary fields
+  isCadre: boolean;
+  overtimeGross: number;
+  hasMutuelle: boolean;
+  mutuelleMonthly: number;
+  isCadreConjoint: boolean;
+  overtimeGrossConjoint: number;
+  hasMutuelleConjoint: boolean;
+  mutuelleMonthlyConjoint: number;
 }
 
 export interface UrlState {
@@ -60,6 +69,14 @@ const defaultScenario: ScenarioState = {
   grossIncomeConjoint: 0,
   deductionModeConjoint: "forfait_10",
   realExpensesConjoint: 0,
+  isCadre: false,
+  overtimeGross: 0,
+  hasMutuelle: false,
+  mutuelleMonthly: 0,
+  isCadreConjoint: false,
+  overtimeGrossConjoint: 0,
+  hasMutuelleConjoint: false,
+  mutuelleMonthlyConjoint: 0,
 };
 
 function readScenario(p: URLSearchParams, prefix: string, defaults: ScenarioState): ScenarioState {
@@ -75,6 +92,14 @@ function readScenario(p: URLSearchParams, prefix: string, defaults: ScenarioStat
     grossIncomeConjoint: parseNum(p, `${prefix}gc`, defaults.grossIncomeConjoint),
     deductionModeConjoint: parseEnum(p, `${prefix}dc`, DEDUCTION_MODES, defaults.deductionModeConjoint),
     realExpensesConjoint: parseNum(p, `${prefix}rc`, defaults.realExpensesConjoint),
+    isCadre: parseBool(p, `${prefix}ca`, defaults.isCadre),
+    overtimeGross: parseNum(p, `${prefix}ot`, defaults.overtimeGross),
+    hasMutuelle: parseBool(p, `${prefix}mu`, defaults.hasMutuelle),
+    mutuelleMonthly: parseNum(p, `${prefix}mm`, defaults.mutuelleMonthly),
+    isCadreConjoint: parseBool(p, `${prefix}cca`, defaults.isCadreConjoint),
+    overtimeGrossConjoint: parseNum(p, `${prefix}cot`, defaults.overtimeGrossConjoint),
+    hasMutuelleConjoint: parseBool(p, `${prefix}cmu`, defaults.hasMutuelleConjoint),
+    mutuelleMonthlyConjoint: parseNum(p, `${prefix}cmm`, defaults.mutuelleMonthlyConjoint),
   };
 }
 
@@ -91,7 +116,16 @@ function writeScenario(p: URLSearchParams, prefix: string, s: ScenarioState): vo
     p.set(`${prefix}gc`, String(s.grossIncomeConjoint));
     if (s.deductionModeConjoint !== "forfait_10") p.set(`${prefix}dc`, s.deductionModeConjoint);
     if (s.realExpensesConjoint > 0) p.set(`${prefix}rc`, String(s.realExpensesConjoint));
+    if (s.isCadreConjoint) p.set(`${prefix}cca`, "1");
+    if (s.overtimeGrossConjoint > 0) p.set(`${prefix}cot`, String(s.overtimeGrossConjoint));
+    if (s.hasMutuelleConjoint) p.set(`${prefix}cmu`, "1");
+    if (s.mutuelleMonthlyConjoint > 0) p.set(`${prefix}cmm`, String(s.mutuelleMonthlyConjoint));
   }
+  // v0.2 salary fields
+  if (s.isCadre) p.set(`${prefix}ca`, "1");
+  if (s.overtimeGross > 0) p.set(`${prefix}ot`, String(s.overtimeGross));
+  if (s.hasMutuelle) p.set(`${prefix}mu`, "1");
+  if (s.mutuelleMonthly > 0) p.set(`${prefix}mm`, String(s.mutuelleMonthly));
 }
 
 function readFromUrl(): UrlState {
