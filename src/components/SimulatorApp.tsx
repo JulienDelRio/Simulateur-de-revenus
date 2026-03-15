@@ -11,7 +11,7 @@ import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
 import { StackedCostChart } from "./StackedCostChart";
 import { EmployerForm } from "./EmployerForm";
-import { EmployerResultsTable } from "./EmployerResultsTable";
+import { EmployerResultsTable, EmployerComparisonTable } from "./EmployerResultsTable";
 import { TabNav } from "./TabNav";
 import { useUrlState } from "./useUrlState";
 import type { ScenarioState } from "./useUrlState";
@@ -348,6 +348,10 @@ function SalaryTab({
             isDetailView={isDetailView}
           />
         </div>
+        <EmployerComparisonTable
+          employer1={result1.employer}
+          employer2={result2.employer}
+        />
         <div className="grid md:grid-cols-2 gap-6">
           <SalaryResultsTable
             social={result1.social}

@@ -44,7 +44,7 @@ export function EmployerResultsTable({ employer, label, isDetailView }: Employer
                   <td className="py-0.5 px-2 pl-4 text-xs">
                     {c.label}
                     <span className="ml-1 text-gray-300">
-                      ({(c.rate * 100).toFixed(2)} %)
+                      ({(c.rate * 100).toFixed(2)} % sur {formatCurrencyInt(c.base)})
                     </span>
                   </td>
                   <td className="py-0.5 px-2 text-right tabular-nums text-xs">
@@ -111,6 +111,60 @@ export function EmployerResultsTable({ employer, label, isDetailView }: Employer
           )}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+interface EmployerComparisonProps {
+  employer1: EmployerResult;
+  employer2: EmployerResult;
+}
+
+export function EmployerComparisonTable({ employer1, employer2 }: EmployerComparisonProps) {
+  const rows = [
+    { label: "Super brut", v1: employer1.superBrut, v2: employer2.superBrut, highlight: true },
+    { label: "Cotisations patronales", v1: employer1.totalContributions, v2: employer2.totalContributions },
+    { label: "RGDU", v1: employer1.rgdu.amount, v2: employer2.rgdu.amount },
+    { label: "Salaire brut", v1: employer1.grossSalary, v2: employer2.grossSalary, highlight: true },
+    { label: "Taux effectif", v1: employer1.effectiveRate, v2: employer2.effectiveRate, isPercent: true },
+  ] as const;
+
+  return (
+    <div>
+      <h3 className="text-md font-semibold text-gray-700 mb-2">Comparaison coût employeur</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[360px]">
+          <thead>
+            <tr className="text-gray-500 text-xs">
+              <th className="text-left py-1 px-2"></th>
+              <th className="text-right py-1 px-2">Situation 1</th>
+              <th className="text-right py-1 px-2">Situation 2</th>
+              <th className="text-right py-1 px-2">Delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => {
+              const delta = row.v2 - row.v1;
+              const deltaClass =
+                delta > 0 ? "text-red-600" : delta < 0 ? "text-green-600" : "text-gray-400";
+
+              const isPct = "isPercent" in row && row.isPercent;
+              const fmt = (v: number) => isPct ? `${v.toFixed(1)} %` : formatCurrencyInt(v);
+
+              return (
+                <tr key={row.label} className={row.highlight ? "font-semibold bg-purple-50" : ""}>
+                  <td className="py-1.5 px-2 text-gray-600">{row.label}</td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">{fmt(row.v1)}</td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">{fmt(row.v2)}</td>
+                  <td className={`py-1.5 px-2 text-right tabular-nums ${isPct ? "text-gray-500" : deltaClass}`}>
+                    {isPct ? "—" : `${delta > 0 ? "+" : ""}${formatCurrencyInt(delta)}`}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

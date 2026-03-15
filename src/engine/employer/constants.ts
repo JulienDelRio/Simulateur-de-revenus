@@ -43,5 +43,7 @@ export const RGDU_T_MIN = 0.02;
 export const RGDU_P = 1.75;
 export const RGDU_T_DELTA_SMALL = 0.3781;  // < 50 employees
 export const RGDU_T_DELTA_LARGE = 0.3821;  // >= 50 employees
-export const RGDU_IRC_CAP = 0.0601;        // max coefficient for IRC portion
+// RM-224: IRC portion of RGDU coefficient capped at 6.01%.
+// Not computed in the simulator (only affects payroll reporting, not total RGDU amount).
+export const RGDU_IRC_CAP = 0.0601;
 export const RGDU_ATMP_MUTUALIZED_RATE = 0.0049; // fraction mutualisée AT/MP
