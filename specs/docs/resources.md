@@ -176,6 +176,20 @@ Depuis la fusion Agirc-Arrco, les taux de retraite complémentaire sont identiqu
 
 > **Note** : un amendement au PLF 2026 propose de supprimer le plafond de 7 500 €. En mars 2026, le plafond de 7 500 € reste en vigueur. À surveiller.
 
+### Prélèvement à la source — Taux individualisé
+
+**Source** : [BOFIP BOI-IR-PAS-20-20-20 — Taux individualisé](https://bofip.impots.gouv.fr/bofip/11256-PGP.html/identifiant=BOI-IR-PAS-20-20-20-20250507)
+**Source** : [impots.gouv.fr — Individualisation des taux](https://www.impots.gouv.fr/particulier/lindividualisation-des-taux-de-prelevement)
+**Source** : [Service Public — Répartition par défaut pour les couples](https://www.service-public.gouv.fr/particuliers/actualites/A18226)
+
+Depuis septembre 2025, le taux individualisé est appliqué **par défaut** aux couples mariés ou pacsés (possibilité d'opter pour le taux du foyer).
+
+**Formule du taux individualisé (salaires uniquement, sans revenus communs)** :
+- **Taux 1** (conjoint aux revenus les plus faibles) : IR calculé sur ses seuls revenus avec la moitié des parts du foyer, divisé par ses revenus
+- **Taux 2** (autre conjoint) : `(IR_foyer - Taux_1 × Revenus_1) / Revenus_2`
+
+Le total des PAS individualisés est égal au PAS avec le taux du foyer (redistribution à somme nulle).
+
 ### Taxe d'apprentissage et formation professionnelle 2026
 
 **Source** : [Taxe d'apprentissage 2026](https://www.legisocial.fr/reperes-sociaux/taxe-apprentissage-2026.html)
