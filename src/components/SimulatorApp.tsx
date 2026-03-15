@@ -219,30 +219,24 @@ function computeIndividualizedIR(
   const revLow = isDeclarantLower ? rev1 : rev2;
   const revHigh = isDeclarantLower ? rev2 : rev1;
 
-  // Taux 1: IR on the lower income alone, with half the parts
-  const halfParts = parts / 2;
-  const irLow = simulate({
+  // Taux 1: IR on the lower income with half the foyer's parts
+  // Half the parts = base 1 + half of children's parts
+  // For 3 parts (couple + 2 children): half = 1.5 parts → celibataire + 1 child
+  const halfChildrenParts = (parts - 2) / 2; // children's half-parts
+  const halfChildren = Math.round(halfChildrenParts * 2); // convert to children count for celibataire
+
+  const irLowResult = simulate({
     declarant: { grossIncome: revLow, deductionMode: "forfait_10", realExpenses: 0 },
     conjoint: null,
     familyStatus: "celibataire",
     isJointDeclaration: false,
-    childrenCount: 0,
-    isLoneParent: false,
+    childrenCount: halfChildren,
+    isLoneParent: halfChildren > 0,
   });
-  // Recalculate with half parts using the QF system
-  const incomePerHalfPart = revLow / halfParts;
-  const irLowWithHalfParts = simulate({
-    declarant: { grossIncome: revLow, deductionMode: "forfait_10", realExpenses: 0 },
-    conjoint: { grossIncome: 0, deductionMode: "forfait_10", realExpenses: 0 },
-    familyStatus: "marie_pacse",
-    isJointDeclaration: true,
-    childrenCount: result.tax.parts >= 3 ? Math.round((result.tax.parts - 2) * 2) : 0,
-    isLoneParent: false,
-  });
-  const taux1 = revLow > 0 ? irLowWithHalfParts.finalTax / revLow : 0;
+  const taux1 = revLow > 0 ? irLowResult.finalTax / revLow : 0;
 
-  // Taux 2: residual
-  const taux2 = revHigh > 0 ? (irFoyer - taux1 * revLow) / revHigh : 0;
+  // Taux 2: residual = (IR_foyer - taux1 * revLow) / revHigh
+  const taux2 = revHigh > 0 ? Math.max(0, (irFoyer - taux1 * revLow) / revHigh) : 0;
 
   if (member === "declarant") {
     return Math.round((isDeclarantLower ? taux1 : taux2) * rev1);
@@ -291,7 +285,20 @@ function SalaryTab({
 
   function getIRAmount(result: CombinedResult, member: "declarant" | "conjoint"): number | null {
     if (irMode === "none") return null;
-    if (irMode === "foyer") return result.tax.finalTax;
+
+    // Single income: full IR goes to declarant
+    if (!result.socialConjoint) return result.tax.finalTax;
+
+    if (irMode === "foyer") {
+      // Proportional split based on net taxable income
+      const rev1 = result.social.netTaxable;
+      const rev2 = result.socialConjoint.netTaxable;
+      const total = rev1 + rev2;
+      if (total === 0) return 0;
+      const ratio = member === "declarant" ? rev1 / total : rev2 / total;
+      return Math.round(result.tax.finalTax * ratio);
+    }
+
     return computeIndividualizedIR(result, member);
   }
 
