@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { simulateCombined } from "../engine";
+import { useState, useMemo, useId } from "react";
+import { simulate, simulateCombined } from "../engine";
 import type { CombinedInput, CombinedResult } from "../engine";
 import { FamilyForm } from "./FamilyForm";
 import { ScenarioForm } from "./ScenarioForm";
@@ -201,6 +201,55 @@ function SituationBlock({
   );
 }
 
+type IRMode = "none" | "foyer" | "individualized";
+
+function computeIndividualizedIR(
+  result: CombinedResult,
+  member: "declarant" | "conjoint",
+): number {
+  if (!result.socialConjoint) return result.tax.finalTax;
+
+  const rev1 = result.social.netTaxable;
+  const rev2 = result.socialConjoint.netTaxable;
+  const irFoyer = result.tax.finalTax;
+  const parts = result.tax.parts;
+
+  // Determine who has the lowest income
+  const isDeclarantLower = rev1 <= rev2;
+  const revLow = isDeclarantLower ? rev1 : rev2;
+  const revHigh = isDeclarantLower ? rev2 : rev1;
+
+  // Taux 1: IR on the lower income alone, with half the parts
+  const halfParts = parts / 2;
+  const irLow = simulate({
+    declarant: { grossIncome: revLow, deductionMode: "forfait_10", realExpenses: 0 },
+    conjoint: null,
+    familyStatus: "celibataire",
+    isJointDeclaration: false,
+    childrenCount: 0,
+    isLoneParent: false,
+  });
+  // Recalculate with half parts using the QF system
+  const incomePerHalfPart = revLow / halfParts;
+  const irLowWithHalfParts = simulate({
+    declarant: { grossIncome: revLow, deductionMode: "forfait_10", realExpenses: 0 },
+    conjoint: { grossIncome: 0, deductionMode: "forfait_10", realExpenses: 0 },
+    familyStatus: "marie_pacse",
+    isJointDeclaration: true,
+    childrenCount: result.tax.parts >= 3 ? Math.round((result.tax.parts - 2) * 2) : 0,
+    isLoneParent: false,
+  });
+  const taux1 = revLow > 0 ? irLowWithHalfParts.finalTax / revLow : 0;
+
+  // Taux 2: residual
+  const taux2 = revHigh > 0 ? (irFoyer - taux1 * revLow) / revHigh : 0;
+
+  if (member === "declarant") {
+    return Math.round((isDeclarantLower ? taux1 : taux2) * rev1);
+  }
+  return Math.round((isDeclarantLower ? taux2 : taux1) * rev2);
+}
+
 function SalaryTab({
   result1,
   result2,
@@ -211,6 +260,8 @@ function SalaryTab({
   isCompareMode: boolean;
 }) {
   const [isDetailView, setIsDetailView] = useState(false);
+  const [irMode, setIRMode] = useState<IRMode>("none");
+  const irToggleId = useId();
 
   const viewToggle = (
     <div className="flex items-center gap-2 justify-end">
@@ -238,10 +289,46 @@ function SalaryTab({
     </div>
   );
 
+  function getIRAmount(result: CombinedResult, member: "declarant" | "conjoint"): number | null {
+    if (irMode === "none") return null;
+    if (irMode === "foyer") return result.tax.finalTax;
+    return computeIndividualizedIR(result, member);
+  }
+
+  const irControls = (
+    <div className="flex items-center gap-3 text-xs">
+      <div className="flex items-center gap-1.5">
+        <input
+          type="checkbox"
+          id={`${irToggleId}-show-ir`}
+          checked={irMode !== "none"}
+          onChange={(e) => setIRMode(e.target.checked ? "foyer" : "none")}
+          className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <label htmlFor={`${irToggleId}-show-ir`} className="text-gray-600">
+          Inclure l'IR
+        </label>
+      </div>
+      {irMode !== "none" && (
+        <select
+          value={irMode}
+          onChange={(e) => setIRMode(e.target.value as IRMode)}
+          className="rounded border border-gray-300 px-2 py-0.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="foyer">Taux du foyer</option>
+          <option value="individualized">Taux individualisé</option>
+        </select>
+      )}
+    </div>
+  );
+
   if (isCompareMode && result2) {
     return (
       <div className="space-y-6">
-        {viewToggle}
+        <div className="flex justify-between items-center">
+          {irControls}
+          {viewToggle}
+        </div>
         <div className="grid md:grid-cols-2 gap-6">
           <EmployerResultsTable
             employer={result1.employer}
@@ -257,13 +344,13 @@ function SalaryTab({
         <div className="grid md:grid-cols-2 gap-6">
           <SalaryResultsTable
             social={result1.social}
-            irAmount={result1.tax.finalTax}
+            irAmount={getIRAmount(result1, "declarant")}
             label="Salaire — Situation 1"
             isDetailView={isDetailView}
           />
           <SalaryResultsTable
             social={result2.social}
-            irAmount={result2.tax.finalTax}
+            irAmount={getIRAmount(result2, "declarant")}
             label="Salaire — Situation 2"
             isDetailView={isDetailView}
           />
@@ -278,13 +365,13 @@ function SalaryTab({
           <StackedCostChart
             social={result1.social}
             employer={result1.employer}
-            irAmount={result1.tax.finalTax}
+            irAmount={getIRAmount(result1, "declarant") ?? 0}
             label="Répartition — Situation 1"
           />
           <StackedCostChart
             social={result2.social}
             employer={result2.employer}
-            irAmount={result2.tax.finalTax}
+            irAmount={getIRAmount(result2, "declarant") ?? 0}
             label="Répartition — Situation 2"
           />
         </div>
@@ -294,7 +381,10 @@ function SalaryTab({
 
   return (
     <div className="space-y-6">
-      {viewToggle}
+      <div className="flex justify-between items-center">
+        {irControls}
+        {viewToggle}
+      </div>
       <EmployerResultsTable
         employer={result1.employer}
         label="Coût employeur"
@@ -302,14 +392,14 @@ function SalaryTab({
       />
       <SalaryResultsTable
         social={result1.social}
-        irAmount={result1.tax.finalTax}
+        irAmount={getIRAmount(result1, "declarant")}
         label="Décomposition du salaire"
         isDetailView={isDetailView}
       />
       <StackedCostChart
         social={result1.social}
         employer={result1.employer}
-        irAmount={result1.tax.finalTax}
+        irAmount={getIRAmount(result1, "declarant") ?? 0}
         label="Répartition du coût"
       />
     </div>
