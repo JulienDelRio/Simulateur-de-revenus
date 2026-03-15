@@ -10,6 +10,8 @@ import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
 import { WaterfallChart } from "./ContributionsChart";
+import { EmployerForm } from "./EmployerForm";
+import { EmployerResultsTable } from "./EmployerResultsTable";
 import { TabNav } from "./TabNav";
 import { useUrlState } from "./useUrlState";
 import type { ScenarioState } from "./useUrlState";
@@ -130,6 +132,26 @@ function SituationBlock({
               })
             }
           />
+          <EmployerForm
+            data={{
+              companySize: scenario.companySize,
+              atmpRate: scenario.atmpRate,
+              hasTransportLevy: scenario.hasTransportLevy,
+              transportLevyRate: scenario.transportLevyRate,
+              prevoyanceRate: scenario.prevoyanceRate,
+              isCadre: scenario.isCadre,
+            }}
+            onChange={(data) =>
+              onChange({
+                ...scenario,
+                companySize: data.companySize,
+                atmpRate: data.atmpRate,
+                hasTransportLevy: data.hasTransportLevy,
+                transportLevyRate: data.transportLevyRate,
+                prevoyanceRate: data.prevoyanceRate,
+              })
+            }
+          />
           {scenario.isSeparateIncome && (
             <>
               <hr className="border-gray-200" />
@@ -148,6 +170,26 @@ function SituationBlock({
                     overtimeGrossConjoint: data.overtimeGross,
                     hasMutuelleConjoint: data.hasMutuelle,
                     mutuelleMonthlyConjoint: data.mutuelleMonthly,
+                  })
+                }
+              />
+              <EmployerForm
+                data={{
+                  companySize: scenario.companySizeConjoint,
+                  atmpRate: scenario.atmpRateConjoint,
+                  hasTransportLevy: scenario.hasTransportLevyConjoint,
+                  transportLevyRate: scenario.transportLevyRateConjoint,
+                  prevoyanceRate: scenario.prevoyanceRateConjoint,
+                  isCadre: scenario.isCadreConjoint,
+                }}
+                onChange={(data) =>
+                  onChange({
+                    ...scenario,
+                    companySizeConjoint: data.companySize,
+                    atmpRateConjoint: data.atmpRate,
+                    hasTransportLevyConjoint: data.hasTransportLevy,
+                    transportLevyRateConjoint: data.transportLevyRate,
+                    prevoyanceRateConjoint: data.prevoyanceRate,
                   })
                 }
               />
@@ -172,15 +214,25 @@ function SalaryTab({
     return (
       <div className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
+          <EmployerResultsTable
+            employer={result1.employer}
+            label="Coût employeur — Situation 1"
+          />
+          <EmployerResultsTable
+            employer={result2.employer}
+            label="Coût employeur — Situation 2"
+          />
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
           <SalaryResultsTable
             social={result1.social}
             irAmount={result1.tax.finalTax}
-            label="Situation 1"
+            label="Salaire — Situation 1"
           />
           <SalaryResultsTable
             social={result2.social}
             irAmount={result2.tax.finalTax}
-            label="Situation 2"
+            label="Salaire — Situation 2"
           />
         </div>
         <SalaryComparisonTable
@@ -207,6 +259,10 @@ function SalaryTab({
 
   return (
     <div className="space-y-6">
+      <EmployerResultsTable
+        employer={result1.employer}
+        label="Coût employeur"
+      />
       <SalaryResultsTable
         social={result1.social}
         irAmount={result1.tax.finalTax}
