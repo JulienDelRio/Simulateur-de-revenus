@@ -27,13 +27,33 @@ interface CurvePoint {
   marker2?: boolean;
 }
 
+function scaleInput(input: TaxInput, totalIncome: number): TaxInput {
+  const originalTotal =
+    input.declarant.grossIncome + (input.conjoint?.grossIncome ?? 0);
+  const ratio = originalTotal > 0 ? totalIncome / originalTotal : 1;
+
+  return {
+    declarant: { ...input.declarant, grossIncome: input.declarant.grossIncome * ratio },
+    conjoint: input.conjoint
+      ? { ...input.conjoint, grossIncome: input.conjoint.grossIncome * ratio }
+      : null,
+    familyStatus: input.familyStatus,
+    isJointDeclaration: input.isJointDeclaration,
+    childrenCount: input.childrenCount,
+    isLoneParent: input.isLoneParent,
+  };
+}
+
 function buildCurveData(
   input1: TaxInput,
+  result1: TaxResult,
   input2: TaxInput | null,
-  income1: number,
-  income2: number | null,
+  result2: TaxResult | null,
   maxIncome: number,
 ): CurvePoint[] {
+  const income1 = result1.grossIncome;
+  const income2 = result2?.grossIncome ?? null;
+
   const step = Math.max(1_000, Math.round(maxIncome / 100 / 1_000) * 1_000);
 
   const incomes = new Set<number>();
@@ -46,36 +66,24 @@ function buildCurveData(
   const sorted = [...incomes].sort((a, b) => a - b);
 
   return sorted.map((income) => {
-    const simInput1 = {
-      declarant: { ...input1.declarant, grossIncome: income },
-      conjoint: input1.conjoint ? { ...input1.conjoint } : null,
-      familyStatus: input1.familyStatus,
-      isJointDeclaration: input1.isJointDeclaration,
-      childrenCount: input1.childrenCount,
-      isLoneParent: input1.isLoneParent,
-    };
-    const r1 = simulate(simInput1);
+    const isMarker1 = income === income1;
+    const isMarker2 = income2 !== null && income === income2;
+
+    // For marker points, use actual results instead of recalculating
+    const r1 = isMarker1 ? result1 : simulate(scaleInput(input1, income));
 
     const point: CurvePoint = {
       income,
       rate1: r1.effectiveRate,
       tax1: r1.finalTax,
-      marker1: income === income1 ? true : undefined,
+      marker1: isMarker1 ? true : undefined,
     };
 
-    if (input2) {
-      const simInput2 = {
-        declarant: { ...input2.declarant, grossIncome: income },
-        conjoint: input2.conjoint ? { ...input2.conjoint } : null,
-        familyStatus: input2.familyStatus,
-        isJointDeclaration: input2.isJointDeclaration,
-        childrenCount: input2.childrenCount,
-        isLoneParent: input2.isLoneParent,
-      };
-      const r2 = simulate(simInput2);
+    if (input2 && result2) {
+      const r2 = isMarker2 ? result2 : simulate(scaleInput(input2, income));
       point.rate2 = r2.effectiveRate;
       point.tax2 = r2.finalTax;
-      point.marker2 = income2 !== null && income === income2 ? true : undefined;
+      point.marker2 = isMarker2 ? true : undefined;
     }
 
     return point;
@@ -106,7 +114,7 @@ function CustomTooltip({ active, payload }: any) {
         <p className="font-semibold text-gray-700">{labels.join(" & ")}</p>
       )}
       <p className="text-gray-600">
-        Net imposable : {formatCurrency(point.income)}
+        Revenu brut : {formatCurrency(point.income)}
       </p>
       <div className="flex gap-4">
         <div>
@@ -151,9 +159,9 @@ export function EffectiveRateChart({
 
   const curveData = buildCurveData(
     baseInput,
+    currentResult,
     futureInput,
-    currentResult.grossIncome,
-    futureResult?.grossIncome ?? null,
+    futureResult,
     maxX,
   );
 
@@ -162,7 +170,7 @@ export function EffectiveRateChart({
   return (
     <div>
       <h3 className="text-md font-semibold text-gray-700 mb-2">
-        Taux effectif IR (sur le net imposable)
+        Taux effectif IR (sur le revenu brut)
       </h3>
       <div style={{ width: "100%", height: 280 }}>
         <ResponsiveContainer>
@@ -176,7 +184,7 @@ export function EffectiveRateChart({
                 v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v.toString()
               }
               label={{
-                value: "Net imposable (€)",
+                value: "Revenu brut (€)",
                 position: "insideBottom",
                 offset: -5,
                 fontSize: 10,
