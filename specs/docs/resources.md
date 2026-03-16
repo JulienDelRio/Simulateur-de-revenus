@@ -259,6 +259,87 @@ Taux variable par commune :
 
 Applicable aux employeurs de 11 salariés et plus dans une zone couverte par une AOM.
 
+### Micro-entrepreneur — Cotisations sociales 2026
+
+**Source** : [Micro-entreprises, quel est le montant de vos cotisations sociales ?](https://www.economie.gouv.fr/entreprises/gerer-sa-micro-entreprise/micro-entreprises-quel-est-le-montant-de-vos-cotisations-sociales)
+**Source** : [Auto-entrepreneurs : cotisations sociales applicables en 2026](https://www.legisocial.fr/reperes-sociaux/cotisations-sociales-auto-entrepreneurs-2026.html)
+**Source** : [Cotisations sociales d'un micro-entrepreneur](https://entreprendre.service-public.gouv.fr/vosdroits/F36232)
+
+| Type d'activité | Taux cotisations | Taux ACRE 50 % | Taux ACRE 25 % |
+|-----------------|------------------|----------------|----------------|
+| BIC vente | 12,3 % | 6,15 % | 9,225 % |
+| BIC prestation de services | 21,2 % | 10,6 % | 15,9 % |
+| BNC régime général | 25,6 % | 12,8 % | 19,2 % |
+| BNC CIPAV | 23,2 % | 11,6 % | 17,4 % |
+
+### Micro-entrepreneur — Seuils de chiffre d'affaires 2026
+
+**Source** : [Quels sont les nouveaux seuils de la micro-entreprise ?](https://entreprendre.service-public.gouv.fr/actualites/A18813)
+**Source** : [Dépassement des seuils de CA](https://entreprendre.service-public.gouv.fr/vosdroits/F32353)
+
+| Activité | Seuil CA annuel HT |
+|----------|-------------------|
+| BIC vente de marchandises | 203 100 € |
+| BIC prestation / BNC | 83 600 € |
+
+Seuils applicables pour la période 2026-2028. Dépassement sur 2 années consécutives = sortie du régime micro.
+
+### Micro-entrepreneur — Régime fiscal et versement libératoire
+
+**Source** : [Régime fiscal de la micro-entreprise](https://entreprendre.service-public.gouv.fr/vosdroits/F23267)
+**Source** : [Le versement libératoire](https://www.impots.gouv.fr/professionnel/le-versement-liberatoire)
+
+**Abattement forfaitaire (barème progressif)** :
+
+| Activité | Abattement | Minimum |
+|----------|-----------|---------|
+| BIC vente | 71 % | 305 € |
+| BIC prestation | 50 % | 305 € |
+| BNC | 34 % | 305 € |
+
+**Versement libératoire de l'IR** :
+
+| Activité | Taux VL |
+|----------|---------|
+| BIC vente | 1,0 % |
+| BIC prestation | 1,7 % |
+| BNC | 2,2 % |
+
+Condition d'éligibilité : revenu fiscal de référence N-2 ≤ 29 315 € par part de quotient familial.
+
+### Micro-entrepreneur — ACRE 2026
+
+**Source** : [Aide à la création ou à la reprise d'une entreprise (ACRE)](https://entreprendre.service-public.gouv.fr/vosdroits/F11677)
+**Source** : [L'ACRE - Urssaf](https://www.urssaf.fr/accueil/exoneration-acre-createur.html)
+
+- **Avant le 01/07/2026** : exonération de 50 % des cotisations sociales pendant 4 trimestres civils
+- **À partir du 01/07/2026** : exonération réduite à 25 % (décret n° 2026-xxx du 06/02/2026)
+- Durée : jusqu'à la fin du 3e trimestre civil suivant le début d'activité
+- Délai de demande (à partir du 01/07/2026) : 60 jours après la date d'ouverture de l'activité
+
+### Micro-entrepreneur — Taxes consulaires (CCI / CMA)
+
+**Source** : [Taxes pour frais de chambre consulaire du micro-entrepreneur](https://entreprendre.service-public.gouv.fr/vosdroits/F37483)
+
+| Chambre | Activité | Taux |
+|---------|----------|------|
+| CCI | Vente de marchandises | 0,015 % |
+| CCI | Prestation de services commerciales | 0,044 % |
+| CMA | Achat/revente artisanale | 0,22 % |
+| CMA | Prestation de services artisanales | 0,48 % |
+
+Exonération CCI si CA ≤ 5 000 €. Non applicable aux BNC.
+
+### Micro-entrepreneur — CFP (Contribution à la Formation Professionnelle)
+
+**Source** : [CFP des entrepreneurs individuels](https://entreprendre.service-public.gouv.fr/vosdroits/F23459)
+
+| Activité | Taux CFP |
+|----------|---------|
+| Commerce (BIC vente) | 0,10 % |
+| Artisanat (BIC prestation) | 0,30 % |
+| Profession libérale (BNC) | 0,20 % |
+
 ## Simulateurs existants
 
 <!-- Références à d'autres simulateurs pour benchmarker -->

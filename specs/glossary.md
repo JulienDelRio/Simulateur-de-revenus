@@ -196,7 +196,40 @@ Fraction du salaire brut comprise entre 0 et 1 PASS (48 060 EUR en 2026). Utilis
 **Tranche 2 (T2)**
 Fraction du salaire brut comprise entre 1 PASS et 8 PASS (48 060 a 384 480 EUR en 2026). Utilisee comme assiette pour les cotisations Agirc-Arrco T2 et CEG T2.
 
-## Termes prevus pour les versions futures
+## Micro-entrepreneur (v0.4)
 
-**Micro-entrepreneur**
-Statut simplifie pour les travailleurs independants, avec cotisations forfaitaires et abattement fiscal specifique selon le type d'activite. Prevu pour la v0.4.
+**Micro-entrepreneur (auto-entrepreneur)**
+Statut simplifie pour les travailleurs independants, avec cotisations sociales forfaitaires calculees en pourcentage du chiffre d'affaires et abattement fiscal specifique selon le type d'activite. Le regime micro-entrepreneur est soumis a des seuils de chiffre d'affaires (203 100 EUR pour la vente, 83 600 EUR pour les services/BNC en 2026).
+
+**Chiffre d'affaires (CA)**
+Montant total des recettes encaissees par le micro-entrepreneur sur une annee, hors taxes (HT). C'est l'equivalent du "revenu brut" pour les salaries. Sert d'assiette au calcul des cotisations sociales, de la CFP, des taxes consulaires et du versement liberatoire.
+
+**BIC (Benefices Industriels et Commerciaux)**
+Categorie fiscale applicable aux activites commerciales, industrielles et artisanales. En micro-entreprise, on distingue deux sous-types : BIC vente (achat/revente, abattement 71 %) et BIC prestation de services (abattement 50 %).
+
+**BNC (Benefices Non Commerciaux)**
+Categorie fiscale applicable aux professions liberales et aux activites non commerciales. En micro-entreprise, l'abattement forfaitaire est de 34 %. Deux regimes de retraite coexistent : regime general et CIPAV.
+
+**CIPAV (Caisse Interprofessionnelle de Prevoyance et d'Assurance Vieillesse)**
+Caisse de retraite complementaire pour certaines professions liberales (architectes, ingenieurs-conseils, psychologues, etc.). Les micro-entrepreneurs relevant de la CIPAV ont un taux de cotisations sociales de 23,2 % (contre 25,6 % au regime general).
+
+**Cotisations sociales forfaitaires (micro-entrepreneur)**
+Prelevements sociaux obligatoires calcules en appliquant un taux forfaitaire unique au chiffre d'affaires. Ce taux couvre l'ensemble des cotisations : maladie, retraite de base, retraite complementaire, invalidite-deces, allocations familiales, CSG et CRDS. En 2026 : 12,3 % (BIC vente), 21,2 % (BIC prestation), 25,6 % (BNC general), 23,2 % (BNC CIPAV).
+
+**Abattement forfaitaire micro-entrepreneur**
+Deduction forfaitaire appliquee sur le chiffre d'affaires pour determiner le revenu imposable au bareme progressif de l'IR. Represente les charges professionnelles presumees. Taux : 71 % (BIC vente), 50 % (BIC prestation), 34 % (BNC). Minimum : 305 EUR. Ne se cumule pas avec l'abattement de 10 % pour frais professionnels des salaries.
+
+**Versement liberatoire de l'IR**
+Option fiscale permettant au micro-entrepreneur de payer l'impot sur le revenu sous forme d'un prelevement forfaitaire sur le CA, en meme temps que les cotisations sociales. Taux : 1,0 % (BIC vente), 1,7 % (BIC prestation), 2,2 % (BNC). Alternative au bareme progressif avec abattement. Soumis a condition de revenu fiscal de reference (29 315 EUR par part en 2026).
+
+**ACRE (Aide a la Creation ou a la Reprise d'Entreprise)**
+Dispositif d'exoneration partielle de cotisations sociales pour les createurs ou repreneurs d'entreprise. Pour les micro-entrepreneurs, l'exoneration s'applique pendant les 4 premiers trimestres civils. En 2026, deux regimes coexistent : exoneration de 50 % (creations avant le 01/07/2026) et exoneration de 25 % (creations a partir du 01/07/2026).
+
+**TCCI (Taxe pour frais de Chambre de Commerce et d'Industrie)**
+Taxe consulaire due par les micro-entrepreneurs exercant une activite commerciale. Taux : 0,015 % (vente) ou 0,044 % (prestation de services). Exoneration si CA <= 5 000 EUR. Non applicable aux professions liberales (BNC).
+
+**Taxe CMA (Taxe pour frais de Chambre de Metiers et de l'Artisanat)**
+Taxe consulaire due par les micro-entrepreneurs exercant une activite artisanale. Taux : 0,22 % (achat/revente) ou 0,48 % (prestation de services). Non applicable aux professions liberales (BNC).
+
+**CFP micro-entrepreneur (Contribution a la Formation Professionnelle)**
+Contribution obligatoire des micro-entrepreneurs au financement de la formation professionnelle. Taux : 0,10 % (commerce), 0,30 % (artisanat), 0,20 % (profession liberale). A distinguer de la CFP patronale des salaries (v0.3).

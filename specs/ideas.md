@@ -87,32 +87,23 @@ Complète la v0.1 : le visiteur entre un salaire brut et obtient toute la chaîn
 Ajouter le calcul du super brut (coût total employeur) pour les salariés : salaire brut + cotisations patronales.
 Permet de visualiser la chaîne complète : super brut → brut → net avant impôt → net après IR.
 
-### v0.4 — Micro-entrepreneur
+### v0.4 — Micro-entrepreneur ✅
 
-Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abattement IR spécifique par activité.
+Spec complete : `specs/v0.4-micro-entrepreneur.md`
 
-#### Types d'activité
-
-- BIC vente (abattement 71 %)
-- BIC prestation de services (abattement 50 %)
-- BNC (abattement 34 %)
-
-#### Options à gérer
-
-- **Versement libératoire de l'IR** — taux forfaitaire sur le CA au lieu du barème progressif
-- **ACRE** — exonération partielle de cotisations la première année
-
-#### Questions ouvertes
-
-- Vérifie-t-on / affiche-t-on les seuils de CA (188 700 € / 77 700 €) ?
+Cotisations sociales forfaitaires (BIC vente 12,3 %, BIC prestation 21,2 %, BNC general 25,6 %, BNC CIPAV 23,2 %), abattement IR specifique par activite (71 %, 50 %, 34 %), versement liberatoire de l'IR, ACRE (50 % et 25 %), taxes consulaires (CCI/CMA), CFP. Avertissement visuel si CA depasse les seuils (203 100 EUR / 83 600 EUR).
 
 ### v0.5 — Comparaison multi-statuts
 
-Comparaison côte à côte : salarié vs micro-entrepreneur vs SASU vs EI.
+Comparaison côte à côte : salarié vs micro-entrepreneur. La Situation 1 peut être un salarié et la Situation 2 un micro-entrepreneur (ou inversement). Permet de comparer le revenu net pour un même niveau de revenus entre les deux statuts. Inclut la comparaison du coût total (super brut vs CA) et du revenu net après IR.
 
 ### v0.6 — Comparaison de foyers
 
 Comparer deux foyers avec des compositions différentes (situation familiale, nombre d'enfants, parts) pour un même niveau de revenus. Permet de visualiser l'impact de la structure du foyer sur l'imposition.
+
+### v0.7 — Comparaison étendue multi-statuts
+
+Extension de la v0.5 avec d'autres statuts : SASU, EI au régime réel. Comparaison côte à côte entre tous les statuts disponibles.
 
 ### Futures versions (idées)
 
