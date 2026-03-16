@@ -237,6 +237,7 @@ function SituationBlock({
             childrenCount={scenario.childrenCount}
             isLoneParent={scenario.isLoneParent}
             isSeparateIncome={false}
+            hideSeparateIncome
             onChange={(v) =>
               onChange({
                 ...scenario,

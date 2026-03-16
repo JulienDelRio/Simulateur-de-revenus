@@ -7,6 +7,7 @@ interface FamilyFormProps {
   childrenCount: number;
   isLoneParent: boolean;
   isSeparateIncome: boolean;
+  hideSeparateIncome?: boolean;
   onChange: (values: {
     familyStatus: FamilyStatus;
     isJointDeclaration: boolean;
@@ -22,6 +23,7 @@ export function FamilyForm({
   childrenCount,
   isLoneParent,
   isSeparateIncome,
+  hideSeparateIncome,
   onChange,
 }: FamilyFormProps) {
   const uid = useId();
@@ -134,7 +136,7 @@ export function FamilyForm({
       )}
 
       {/* Separate income */}
-      {isCouple && isJointDeclaration && (
+      {isCouple && isJointDeclaration && !hideSeparateIncome && (
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -147,6 +149,11 @@ export function FamilyForm({
             Saisir les revenus séparément (déclarant / conjoint)
           </label>
         </div>
+      )}
+      {isCouple && isJointDeclaration && hideSeparateIncome && (
+        <p className="text-xs text-gray-400">
+          La saisie séparée des revenus du conjoint sera disponible en v0.5.
+        </p>
       )}
     </fieldset>
   );
