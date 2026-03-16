@@ -25,6 +25,8 @@ export type {
 } from "./employer";
 
 export { simulateMicro } from "./micro";
+export { simulateMicroCombined } from "./microCombined";
+export type { MicroCombinedInput, MicroCombinedResult } from "./microCombined";
 export type {
   ActivityType,
   AcreRegime,
