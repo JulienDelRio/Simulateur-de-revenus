@@ -23,3 +23,12 @@ export type {
   EmployerContributionLine,
   RGDUResult,
 } from "./employer";
+
+export { simulateMicro } from "./micro";
+export type {
+  ActivityType,
+  AcreRegime,
+  MicroInput,
+  MicroResult,
+  MicroContributionLine,
+} from "./micro";
