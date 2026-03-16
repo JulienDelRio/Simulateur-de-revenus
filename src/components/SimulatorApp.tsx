@@ -1,26 +1,23 @@
 import { useState, useMemo, useId } from "react";
-import { simulate, simulateCombined } from "../engine";
-import type { CombinedInput, CombinedResult } from "../engine";
+import { simulate, simulateCombined, simulateMicroCombined } from "../engine";
+import type { CombinedInput, CombinedResult, MicroCombinedInput, MicroCombinedResult } from "../engine";
 import { FamilyForm } from "./FamilyForm";
 import { ScenarioForm } from "./ScenarioForm";
 import { SalaryForm } from "./SalaryForm";
+import { MicroForm } from "./MicroForm";
 import { ResultsTable, ComparisonTable } from "./ResultsTable";
 import { SalaryResultsTable, SalaryComparisonTable } from "./SalaryResultsTable";
+import { MicroResultsTable } from "./MicroResultsTable";
 import { BreakdownChart } from "./BreakdownChart";
 import { EffectiveRateChart } from "./EffectiveRateChart";
 import { TaxBracketsTable } from "./TaxBracketsTable";
 import { StackedCostChart } from "./StackedCostChart";
+import { MicroStackedChart } from "./MicroStackedChart";
 import { EmployerForm } from "./EmployerForm";
 import { EmployerResultsTable, EmployerComparisonTable } from "./EmployerResultsTable";
 import { TabNav } from "./TabNav";
 import { useUrlState } from "./useUrlState";
-import type { ScenarioState } from "./useUrlState";
-
-const TABS = [
-  { id: "situation", label: "Situation" },
-  { id: "salaire", label: "Salaire" },
-  { id: "ir", label: "Impôt sur le revenu" },
-];
+import type { ScenarioState, IncomeType } from "./useUrlState";
 
 function buildCombinedInput(s: ScenarioState): CombinedInput {
   return {
@@ -61,6 +58,22 @@ function buildCombinedInput(s: ScenarioState): CombinedInput {
   };
 }
 
+function buildMicroCombinedInput(s: ScenarioState): MicroCombinedInput {
+  return {
+    micro: {
+      turnover: s.microTurnover,
+      activityType: s.microActivityType,
+      isVersementLiberatoire: s.isVersementLiberatoire,
+      isAcre: s.isAcre,
+      acreRegime: s.acreRegime,
+    },
+    familyStatus: s.familyStatus,
+    isJointDeclaration: s.isJointDeclaration,
+    childrenCount: s.childrenCount,
+    isLoneParent: s.isLoneParent,
+  };
+}
+
 function SituationBlock({
   label,
   scenario,
@@ -73,130 +86,188 @@ function SituationBlock({
   return (
     <div className="rounded-lg border border-gray-200 p-4">
       <h2 className="text-lg font-bold text-gray-800 mb-4">{label}</h2>
-      <div className="grid md:grid-cols-3 gap-6">
-        <FamilyForm
-          familyStatus={scenario.familyStatus}
-          isJointDeclaration={scenario.isJointDeclaration}
-          childrenCount={scenario.childrenCount}
-          isLoneParent={scenario.isLoneParent}
-          isSeparateIncome={scenario.isSeparateIncome}
-          onChange={(v) =>
-            onChange({
-              ...scenario,
-              familyStatus: v.familyStatus,
-              isJointDeclaration: v.isJointDeclaration,
-              childrenCount: v.childrenCount,
-              isLoneParent: v.isLoneParent,
-              isSeparateIncome: v.isSeparateIncome,
-            })
+
+      {/* Income type selector */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Type de revenu
+        </label>
+        <select
+          value={scenario.incomeType}
+          onChange={(e) =>
+            onChange({ ...scenario, incomeType: e.target.value as IncomeType })
           }
-        />
-        <ScenarioForm
-          label="Revenus"
-          data={{
-            grossIncome: scenario.grossIncome,
-            deductionMode: scenario.deductionMode,
-            realExpenses: scenario.realExpenses,
-            grossIncomeConjoint: scenario.grossIncomeConjoint,
-            deductionModeConjoint: scenario.deductionModeConjoint,
-            realExpensesConjoint: scenario.realExpensesConjoint,
-          }}
-          isSeparateIncome={scenario.isSeparateIncome}
-          onChange={(data) =>
-            onChange({
-              ...scenario,
-              grossIncome: data.grossIncome,
-              deductionMode: data.deductionMode,
-              realExpenses: data.realExpenses,
-              grossIncomeConjoint: data.grossIncomeConjoint,
-              deductionModeConjoint: data.deductionModeConjoint,
-              realExpensesConjoint: data.realExpensesConjoint,
-            })
-          }
-        />
-        <div className="space-y-4">
-          <SalaryForm
-            data={{
-              isCadre: scenario.isCadre,
-              overtimeGross: scenario.overtimeGross,
-              hasMutuelle: scenario.hasMutuelle,
-              mutuelleMonthly: scenario.mutuelleMonthly,
-            }}
-            onChange={(data) =>
-              onChange({
-                ...scenario,
-                isCadre: data.isCadre,
-                overtimeGross: data.overtimeGross,
-                hasMutuelle: data.hasMutuelle,
-                mutuelleMonthly: data.mutuelleMonthly,
-              })
-            }
-          />
-          <EmployerForm
-            data={{
-              companySize: scenario.companySize,
-              atmpRate: scenario.atmpRate,
-              hasTransportLevy: scenario.hasTransportLevy,
-              transportLevyRate: scenario.transportLevyRate,
-              prevoyanceRate: scenario.prevoyanceRate,
-              isCadre: scenario.isCadre,
-            }}
-            onChange={(data) =>
-              onChange({
-                ...scenario,
-                companySize: data.companySize,
-                atmpRate: data.atmpRate,
-                hasTransportLevy: data.hasTransportLevy,
-                transportLevyRate: data.transportLevyRate,
-                prevoyanceRate: data.prevoyanceRate,
-              })
-            }
-          />
-          {scenario.isSeparateIncome && (
-            <>
-              <hr className="border-gray-200" />
-              <p className="text-sm font-medium text-gray-500">Conjoint</p>
-              <SalaryForm
-                data={{
-                  isCadre: scenario.isCadreConjoint,
-                  overtimeGross: scenario.overtimeGrossConjoint,
-                  hasMutuelle: scenario.hasMutuelleConjoint,
-                  mutuelleMonthly: scenario.mutuelleMonthlyConjoint,
-                }}
-                onChange={(data) =>
-                  onChange({
-                    ...scenario,
-                    isCadreConjoint: data.isCadre,
-                    overtimeGrossConjoint: data.overtimeGross,
-                    hasMutuelleConjoint: data.hasMutuelle,
-                    mutuelleMonthlyConjoint: data.mutuelleMonthly,
-                  })
-                }
-              />
-              <EmployerForm
-                data={{
-                  companySize: scenario.companySizeConjoint,
-                  atmpRate: scenario.atmpRateConjoint,
-                  hasTransportLevy: scenario.hasTransportLevyConjoint,
-                  transportLevyRate: scenario.transportLevyRateConjoint,
-                  prevoyanceRate: scenario.prevoyanceRateConjoint,
-                  isCadre: scenario.isCadreConjoint,
-                }}
-                onChange={(data) =>
-                  onChange({
-                    ...scenario,
-                    companySizeConjoint: data.companySize,
-                    atmpRateConjoint: data.atmpRate,
-                    hasTransportLevyConjoint: data.hasTransportLevy,
-                    transportLevyRateConjoint: data.transportLevyRate,
-                    prevoyanceRateConjoint: data.prevoyanceRate,
-                  })
-                }
-              />
-            </>
-          )}
-        </div>
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="salarie">Salarié</option>
+          <option value="micro">Micro-entrepreneur</option>
+        </select>
       </div>
+
+      {scenario.incomeType === "salarie" ? (
+        <div className="grid md:grid-cols-3 gap-6">
+          <FamilyForm
+            familyStatus={scenario.familyStatus}
+            isJointDeclaration={scenario.isJointDeclaration}
+            childrenCount={scenario.childrenCount}
+            isLoneParent={scenario.isLoneParent}
+            isSeparateIncome={scenario.isSeparateIncome}
+            onChange={(v) =>
+              onChange({
+                ...scenario,
+                familyStatus: v.familyStatus,
+                isJointDeclaration: v.isJointDeclaration,
+                childrenCount: v.childrenCount,
+                isLoneParent: v.isLoneParent,
+                isSeparateIncome: v.isSeparateIncome,
+              })
+            }
+          />
+          <ScenarioForm
+            label="Revenus"
+            data={{
+              grossIncome: scenario.grossIncome,
+              deductionMode: scenario.deductionMode,
+              realExpenses: scenario.realExpenses,
+              grossIncomeConjoint: scenario.grossIncomeConjoint,
+              deductionModeConjoint: scenario.deductionModeConjoint,
+              realExpensesConjoint: scenario.realExpensesConjoint,
+            }}
+            isSeparateIncome={scenario.isSeparateIncome}
+            onChange={(data) =>
+              onChange({
+                ...scenario,
+                grossIncome: data.grossIncome,
+                deductionMode: data.deductionMode,
+                realExpenses: data.realExpenses,
+                grossIncomeConjoint: data.grossIncomeConjoint,
+                deductionModeConjoint: data.deductionModeConjoint,
+                realExpensesConjoint: data.realExpensesConjoint,
+              })
+            }
+          />
+          <div className="space-y-4">
+            <SalaryForm
+              data={{
+                isCadre: scenario.isCadre,
+                overtimeGross: scenario.overtimeGross,
+                hasMutuelle: scenario.hasMutuelle,
+                mutuelleMonthly: scenario.mutuelleMonthly,
+              }}
+              onChange={(data) =>
+                onChange({
+                  ...scenario,
+                  isCadre: data.isCadre,
+                  overtimeGross: data.overtimeGross,
+                  hasMutuelle: data.hasMutuelle,
+                  mutuelleMonthly: data.mutuelleMonthly,
+                })
+              }
+            />
+            <EmployerForm
+              data={{
+                companySize: scenario.companySize,
+                atmpRate: scenario.atmpRate,
+                hasTransportLevy: scenario.hasTransportLevy,
+                transportLevyRate: scenario.transportLevyRate,
+                prevoyanceRate: scenario.prevoyanceRate,
+                isCadre: scenario.isCadre,
+              }}
+              onChange={(data) =>
+                onChange({
+                  ...scenario,
+                  companySize: data.companySize,
+                  atmpRate: data.atmpRate,
+                  hasTransportLevy: data.hasTransportLevy,
+                  transportLevyRate: data.transportLevyRate,
+                  prevoyanceRate: data.prevoyanceRate,
+                })
+              }
+            />
+            {scenario.isSeparateIncome && (
+              <>
+                <hr className="border-gray-200" />
+                <p className="text-sm font-medium text-gray-500">Conjoint</p>
+                <SalaryForm
+                  data={{
+                    isCadre: scenario.isCadreConjoint,
+                    overtimeGross: scenario.overtimeGrossConjoint,
+                    hasMutuelle: scenario.hasMutuelleConjoint,
+                    mutuelleMonthly: scenario.mutuelleMonthlyConjoint,
+                  }}
+                  onChange={(data) =>
+                    onChange({
+                      ...scenario,
+                      isCadreConjoint: data.isCadre,
+                      overtimeGrossConjoint: data.overtimeGross,
+                      hasMutuelleConjoint: data.hasMutuelle,
+                      mutuelleMonthlyConjoint: data.mutuelleMonthly,
+                    })
+                  }
+                />
+                <EmployerForm
+                  data={{
+                    companySize: scenario.companySizeConjoint,
+                    atmpRate: scenario.atmpRateConjoint,
+                    hasTransportLevy: scenario.hasTransportLevyConjoint,
+                    transportLevyRate: scenario.transportLevyRateConjoint,
+                    prevoyanceRate: scenario.prevoyanceRateConjoint,
+                    isCadre: scenario.isCadreConjoint,
+                  }}
+                  onChange={(data) =>
+                    onChange({
+                      ...scenario,
+                      companySizeConjoint: data.companySize,
+                      atmpRateConjoint: data.atmpRate,
+                      hasTransportLevyConjoint: data.hasTransportLevy,
+                      transportLevyRateConjoint: data.transportLevyRate,
+                      prevoyanceRateConjoint: data.prevoyanceRate,
+                    })
+                  }
+                />
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6">
+          <FamilyForm
+            familyStatus={scenario.familyStatus}
+            isJointDeclaration={scenario.isJointDeclaration}
+            childrenCount={scenario.childrenCount}
+            isLoneParent={scenario.isLoneParent}
+            isSeparateIncome={false}
+            onChange={(v) =>
+              onChange({
+                ...scenario,
+                familyStatus: v.familyStatus,
+                isJointDeclaration: v.isJointDeclaration,
+                childrenCount: v.childrenCount,
+                isLoneParent: v.isLoneParent,
+              })
+            }
+          />
+          <MicroForm
+            data={{
+              microTurnover: scenario.microTurnover,
+              microActivityType: scenario.microActivityType,
+              isVersementLiberatoire: scenario.isVersementLiberatoire,
+              isAcre: scenario.isAcre,
+              acreRegime: scenario.acreRegime,
+            }}
+            onChange={(data) =>
+              onChange({
+                ...scenario,
+                microTurnover: data.microTurnover,
+                microActivityType: data.microActivityType,
+                isVersementLiberatoire: data.isVersementLiberatoire,
+                isAcre: data.isAcre,
+                acreRegime: data.acreRegime,
+              })
+            }
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -499,19 +570,142 @@ function IRTab({
   );
 }
 
+function MicroTab({
+  result1,
+  result2,
+  isCompareMode,
+}: {
+  result1: MicroCombinedResult;
+  result2: MicroCombinedResult | null;
+  isCompareMode: boolean;
+}) {
+  if (isCompareMode && result2) {
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          <MicroResultsTable result={result1} label="Activité — Situation 1" />
+          <MicroResultsTable result={result2} label="Activité — Situation 2" />
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <MicroStackedChart result={result1} label="Répartition — Situation 1" />
+          <MicroStackedChart result={result2} label="Répartition — Situation 2" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <MicroResultsTable result={result1} label="Détail des prélèvements" />
+      <MicroStackedChart result={result1} label="Répartition du chiffre d'affaires" />
+    </div>
+  );
+}
+
+function MicroIRTab({
+  result1,
+  result2,
+  isCompareMode,
+}: {
+  result1: MicroCombinedResult;
+  result2: MicroCombinedResult | null;
+  isCompareMode: boolean;
+}) {
+  if (result1.micro.isAboveThreshold || result2?.micro.isAboveThreshold) {
+    // Show threshold warnings at the top
+  }
+
+  // VL mode: no barème progressif
+  if (result1.tax === null) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+          <p className="text-sm text-blue-800">
+            L'impôt sur le revenu est payé via le <strong>versement libératoire</strong> ({(result1.vlAmount / result1.micro.turnover * 100).toFixed(1)} % du CA = {new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(result1.vlAmount)}).
+            Le barème progressif ne s'applique pas.
+          </p>
+        </div>
+        {isCompareMode && result2 && result2.tax === null && (
+          <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+            <p className="text-sm text-blue-800">
+              <strong>Situation 2 :</strong> versement libératoire = {new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(result2.vlAmount)}
+            </p>
+          </div>
+        )}
+        {isCompareMode && result2 && result2.tax !== null && (
+          <>
+            <ResultsTable result={result2.tax} label="IR — Situation 2 (barème progressif)" />
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // Barème progressif: show full IR tab
+  if (isCompareMode && result2) {
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          <ResultsTable result={result1.tax} label="Situation 1" />
+          {result2.tax ? (
+            <ResultsTable result={result2.tax} label="Situation 2" />
+          ) : (
+            <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+              <p className="text-sm text-blue-800">
+                Situation 2 : versement libératoire = {new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(result2.vlAmount)}
+              </p>
+            </div>
+          )}
+        </div>
+        {result2.tax && (
+          <ComparisonTable current={result1.tax} future={result2.tax} />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <ResultsTable result={result1.tax} label="Résultat IR" />
+      <TaxBracketsTable />
+    </div>
+  );
+}
+
 export function SimulatorApp() {
   const { state, update } = useUrlState();
   const { isCompareMode, current, future } = state;
   const [activeTab, setActiveTab] = useState("situation");
 
+  const isMicro1 = current.incomeType === "micro";
+  const isMicro2 = future.incomeType === "micro";
+
+  // Salarié inputs/results
   const input1 = useMemo(() => buildCombinedInput(current), [current]);
   const input2 = useMemo(() => buildCombinedInput(future), [future]);
-
-  const result1 = useMemo(() => simulateCombined(input1), [input1]);
+  const result1 = useMemo(() => (isMicro1 ? null : simulateCombined(input1)), [isMicro1, input1]);
   const result2 = useMemo(
-    () => (isCompareMode ? simulateCombined(input2) : null),
-    [isCompareMode, input2],
+    () => (isCompareMode && !isMicro2 ? simulateCombined(input2) : null),
+    [isCompareMode, isMicro2, input2],
   );
+
+  // Micro inputs/results
+  const microInput1 = useMemo(() => buildMicroCombinedInput(current), [current]);
+  const microInput2 = useMemo(() => buildMicroCombinedInput(future), [future]);
+  const microResult1 = useMemo(
+    () => (isMicro1 ? simulateMicroCombined(microInput1) : null),
+    [isMicro1, microInput1],
+  );
+  const microResult2 = useMemo(
+    () => (isCompareMode && isMicro2 ? simulateMicroCombined(microInput2) : null),
+    [isCompareMode, isMicro2, microInput2],
+  );
+
+  const tabs = [
+    { id: "situation", label: "Situation" },
+    { id: "salaire", label: isMicro1 ? "Activité" : "Salaire" },
+    { id: "ir", label: "Impôt sur le revenu" },
+  ];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
@@ -543,7 +737,7 @@ export function SimulatorApp() {
         </label>
       </div>
 
-      <TabNav tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div role="tabpanel">
         {activeTab === "situation" && (
@@ -563,11 +757,19 @@ export function SimulatorApp() {
           </div>
         )}
 
-        {activeTab === "salaire" && (
+        {activeTab === "salaire" && isMicro1 && microResult1 && (
+          <MicroTab result1={microResult1} result2={microResult2} isCompareMode={isCompareMode} />
+        )}
+
+        {activeTab === "salaire" && !isMicro1 && result1 && (
           <SalaryTab result1={result1} result2={result2} isCompareMode={isCompareMode} />
         )}
 
-        {activeTab === "ir" && (
+        {activeTab === "ir" && isMicro1 && microResult1 && (
+          <MicroIRTab result1={microResult1} result2={microResult2} isCompareMode={isCompareMode} />
+        )}
+
+        {activeTab === "ir" && !isMicro1 && result1 && (
           <IRTab
             result1={result1}
             result2={result2}
