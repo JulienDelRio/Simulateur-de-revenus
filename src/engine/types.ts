@@ -1,6 +1,6 @@
 export type FamilyStatus = "celibataire" | "marie_pacse" | "veuf";
 
-export type DeductionMode = "forfait_10" | "frais_reels";
+export type DeductionMode = "forfait_10" | "frais_reels" | "none";
 
 export interface MemberIncome {
   grossIncome: number;

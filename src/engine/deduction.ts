@@ -2,6 +2,8 @@ import { DEDUCTION_RATE, DEDUCTION_FLOOR, DEDUCTION_CEILING } from "./constants"
 import type { MemberIncome } from "./types";
 
 export function computeDeduction(member: MemberIncome): number {
+  if (member.deductionMode === "none") return 0;
+
   if (member.deductionMode === "frais_reels") {
     return Math.min(member.realExpenses, member.grossIncome);
   }
