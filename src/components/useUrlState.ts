@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { FamilyStatus, DeductionMode, CompanySize } from "../engine";
+import type { FamilyStatus, DeductionMode, CompanySize, ActivityType, AcreRegime } from "../engine";
+
+export type IncomeType = "salarie" | "micro";
 
 export interface ScenarioState {
   familyStatus: FamilyStatus;
@@ -33,6 +35,14 @@ export interface ScenarioState {
   hasTransportLevyConjoint: boolean;
   transportLevyRateConjoint: number;
   prevoyanceRateConjoint: number;
+  // v0.4 income type
+  incomeType: IncomeType;
+  // v0.4 micro-entrepreneur fields
+  microTurnover: number;
+  microActivityType: ActivityType;
+  isVersementLiberatoire: boolean;
+  isAcre: boolean;
+  acreRegime: AcreRegime;
 }
 
 export interface UrlState {
@@ -44,6 +54,9 @@ export interface UrlState {
 const FAMILY_STATUSES: FamilyStatus[] = ["celibataire", "marie_pacse", "veuf"];
 const DEDUCTION_MODES: DeductionMode[] = ["forfait_10", "frais_reels"];
 const COMPANY_SIZES: CompanySize[] = ["moins_11", "11_49", "50_plus"];
+const INCOME_TYPES: IncomeType[] = ["salarie", "micro"];
+const ACTIVITY_TYPES: ActivityType[] = ["bic_vente", "bic_prestation", "bnc_general", "bnc_cipav"];
+const ACRE_REGIMES: AcreRegime[] = ["50_pourcent", "25_pourcent"];
 
 function parseNum(params: URLSearchParams, key: string, fallback: number): number {
   const val = params.get(key);
@@ -99,6 +112,13 @@ const defaultScenario: ScenarioState = {
   hasTransportLevyConjoint: false,
   transportLevyRateConjoint: 2.95,
   prevoyanceRateConjoint: 1.50,
+  // v0.4
+  incomeType: "salarie",
+  microTurnover: 50_000,
+  microActivityType: "bnc_general",
+  isVersementLiberatoire: false,
+  isAcre: false,
+  acreRegime: "50_pourcent",
 };
 
 function readScenario(p: URLSearchParams, prefix: string, defaults: ScenarioState): ScenarioState {
@@ -132,6 +152,13 @@ function readScenario(p: URLSearchParams, prefix: string, defaults: ScenarioStat
     hasTransportLevyConjoint: parseBool(p, `${prefix}ctl`, defaults.hasTransportLevyConjoint),
     transportLevyRateConjoint: parseNum(p, `${prefix}ctr`, defaults.transportLevyRateConjoint),
     prevoyanceRateConjoint: parseNum(p, `${prefix}cpv`, defaults.prevoyanceRateConjoint),
+    // v0.4
+    incomeType: parseEnum(p, `${prefix}it`, INCOME_TYPES, defaults.incomeType),
+    microTurnover: parseNum(p, `${prefix}mt`, defaults.microTurnover),
+    microActivityType: parseEnum(p, `${prefix}ma`, ACTIVITY_TYPES, defaults.microActivityType),
+    isVersementLiberatoire: parseBool(p, `${prefix}vl`, defaults.isVersementLiberatoire),
+    isAcre: parseBool(p, `${prefix}ac`, defaults.isAcre),
+    acreRegime: parseEnum(p, `${prefix}ar`, ACRE_REGIMES, defaults.acreRegime),
   };
 }
 
@@ -170,6 +197,15 @@ function writeScenario(p: URLSearchParams, prefix: string, s: ScenarioState): vo
     if (s.hasTransportLevyConjoint) p.set(`${prefix}ctl`, "1");
     if (s.transportLevyRateConjoint !== 2.95) p.set(`${prefix}ctr`, String(s.transportLevyRateConjoint));
     if (s.prevoyanceRateConjoint !== 1.50) p.set(`${prefix}cpv`, String(s.prevoyanceRateConjoint));
+  }
+  // v0.4 micro fields (only write non-defaults)
+  if (s.incomeType !== "salarie") p.set(`${prefix}it`, s.incomeType);
+  if (s.incomeType === "micro") {
+    p.set(`${prefix}mt`, String(s.microTurnover));
+    if (s.microActivityType !== "bnc_general") p.set(`${prefix}ma`, s.microActivityType);
+    if (s.isVersementLiberatoire) p.set(`${prefix}vl`, "1");
+    if (s.isAcre) p.set(`${prefix}ac`, "1");
+    if (s.isAcre && s.acreRegime !== "50_pourcent") p.set(`${prefix}ar`, s.acreRegime);
   }
 }
 
