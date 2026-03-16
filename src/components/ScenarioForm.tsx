@@ -116,7 +116,7 @@ export function ScenarioForm({
       {isSeparateIncome ? (
         <div className="space-y-4">
           <IncomeBlock
-            label="Revenu brut — Déclarant"
+            label="Salaire brut — Déclarant"
             grossIncome={data.grossIncome}
             deductionMode={data.deductionMode}
             realExpenses={data.realExpenses}
@@ -131,7 +131,7 @@ export function ScenarioForm({
           />
           <hr className="border-gray-200" />
           <IncomeBlock
-            label="Revenu brut — Conjoint"
+            label="Salaire brut — Conjoint"
             grossIncome={data.grossIncomeConjoint}
             deductionMode={data.deductionModeConjoint}
             realExpenses={data.realExpensesConjoint}
@@ -147,7 +147,7 @@ export function ScenarioForm({
         </div>
       ) : (
         <IncomeBlock
-          label="Revenu brut annuel"
+          label="Salaire brut annuel"
           grossIncome={data.grossIncome}
           deductionMode={data.deductionMode}
           realExpenses={data.realExpenses}

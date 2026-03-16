@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { FamilyStatus, DeductionMode } from "../engine";
+import type { FamilyStatus, DeductionMode, CompanySize } from "../engine";
 
 export interface ScenarioState {
   familyStatus: FamilyStatus;
@@ -13,6 +13,26 @@ export interface ScenarioState {
   grossIncomeConjoint: number;
   deductionModeConjoint: DeductionMode;
   realExpensesConjoint: number;
+  // v0.2 salary fields
+  isCadre: boolean;
+  overtimeGross: number;
+  hasMutuelle: boolean;
+  mutuelleMonthly: number;
+  isCadreConjoint: boolean;
+  overtimeGrossConjoint: number;
+  hasMutuelleConjoint: boolean;
+  mutuelleMonthlyConjoint: number;
+  // v0.3 employer fields
+  companySize: CompanySize;
+  atmpRate: number;
+  hasTransportLevy: boolean;
+  transportLevyRate: number;
+  prevoyanceRate: number;
+  companySizeConjoint: CompanySize;
+  atmpRateConjoint: number;
+  hasTransportLevyConjoint: boolean;
+  transportLevyRateConjoint: number;
+  prevoyanceRateConjoint: number;
 }
 
 export interface UrlState {
@@ -23,6 +43,7 @@ export interface UrlState {
 
 const FAMILY_STATUSES: FamilyStatus[] = ["celibataire", "marie_pacse", "veuf"];
 const DEDUCTION_MODES: DeductionMode[] = ["forfait_10", "frais_reels"];
+const COMPANY_SIZES: CompanySize[] = ["moins_11", "11_49", "50_plus"];
 
 function parseNum(params: URLSearchParams, key: string, fallback: number): number {
   const val = params.get(key);
@@ -60,6 +81,24 @@ const defaultScenario: ScenarioState = {
   grossIncomeConjoint: 0,
   deductionModeConjoint: "forfait_10",
   realExpensesConjoint: 0,
+  isCadre: false,
+  overtimeGross: 0,
+  hasMutuelle: false,
+  mutuelleMonthly: 0,
+  isCadreConjoint: false,
+  overtimeGrossConjoint: 0,
+  hasMutuelleConjoint: false,
+  mutuelleMonthlyConjoint: 0,
+  companySize: "50_plus",
+  atmpRate: 2.08,
+  hasTransportLevy: false,
+  transportLevyRate: 2.95,
+  prevoyanceRate: 1.50,
+  companySizeConjoint: "50_plus",
+  atmpRateConjoint: 2.08,
+  hasTransportLevyConjoint: false,
+  transportLevyRateConjoint: 2.95,
+  prevoyanceRateConjoint: 1.50,
 };
 
 function readScenario(p: URLSearchParams, prefix: string, defaults: ScenarioState): ScenarioState {
@@ -75,6 +114,24 @@ function readScenario(p: URLSearchParams, prefix: string, defaults: ScenarioStat
     grossIncomeConjoint: parseNum(p, `${prefix}gc`, defaults.grossIncomeConjoint),
     deductionModeConjoint: parseEnum(p, `${prefix}dc`, DEDUCTION_MODES, defaults.deductionModeConjoint),
     realExpensesConjoint: parseNum(p, `${prefix}rc`, defaults.realExpensesConjoint),
+    isCadre: parseBool(p, `${prefix}ca`, defaults.isCadre),
+    overtimeGross: parseNum(p, `${prefix}ot`, defaults.overtimeGross),
+    hasMutuelle: parseBool(p, `${prefix}mu`, defaults.hasMutuelle),
+    mutuelleMonthly: parseNum(p, `${prefix}mm`, defaults.mutuelleMonthly),
+    isCadreConjoint: parseBool(p, `${prefix}cca`, defaults.isCadreConjoint),
+    overtimeGrossConjoint: parseNum(p, `${prefix}cot`, defaults.overtimeGrossConjoint),
+    hasMutuelleConjoint: parseBool(p, `${prefix}cmu`, defaults.hasMutuelleConjoint),
+    mutuelleMonthlyConjoint: parseNum(p, `${prefix}cmm`, defaults.mutuelleMonthlyConjoint),
+    companySize: parseEnum(p, `${prefix}cs`, COMPANY_SIZES, defaults.companySize),
+    atmpRate: parseNum(p, `${prefix}at`, defaults.atmpRate),
+    hasTransportLevy: parseBool(p, `${prefix}tl`, defaults.hasTransportLevy),
+    transportLevyRate: parseNum(p, `${prefix}tr`, defaults.transportLevyRate),
+    prevoyanceRate: parseNum(p, `${prefix}pv`, defaults.prevoyanceRate),
+    companySizeConjoint: parseEnum(p, `${prefix}ccs`, COMPANY_SIZES, defaults.companySizeConjoint),
+    atmpRateConjoint: parseNum(p, `${prefix}cat`, defaults.atmpRateConjoint),
+    hasTransportLevyConjoint: parseBool(p, `${prefix}ctl`, defaults.hasTransportLevyConjoint),
+    transportLevyRateConjoint: parseNum(p, `${prefix}ctr`, defaults.transportLevyRateConjoint),
+    prevoyanceRateConjoint: parseNum(p, `${prefix}cpv`, defaults.prevoyanceRateConjoint),
   };
 }
 
@@ -91,6 +148,28 @@ function writeScenario(p: URLSearchParams, prefix: string, s: ScenarioState): vo
     p.set(`${prefix}gc`, String(s.grossIncomeConjoint));
     if (s.deductionModeConjoint !== "forfait_10") p.set(`${prefix}dc`, s.deductionModeConjoint);
     if (s.realExpensesConjoint > 0) p.set(`${prefix}rc`, String(s.realExpensesConjoint));
+    if (s.isCadreConjoint) p.set(`${prefix}cca`, "1");
+    if (s.overtimeGrossConjoint > 0) p.set(`${prefix}cot`, String(s.overtimeGrossConjoint));
+    if (s.hasMutuelleConjoint) p.set(`${prefix}cmu`, "1");
+    if (s.mutuelleMonthlyConjoint > 0) p.set(`${prefix}cmm`, String(s.mutuelleMonthlyConjoint));
+  }
+  // v0.2 salary fields
+  if (s.isCadre) p.set(`${prefix}ca`, "1");
+  if (s.overtimeGross > 0) p.set(`${prefix}ot`, String(s.overtimeGross));
+  if (s.hasMutuelle) p.set(`${prefix}mu`, "1");
+  if (s.mutuelleMonthly > 0) p.set(`${prefix}mm`, String(s.mutuelleMonthly));
+  // v0.3 employer fields (only write non-defaults)
+  if (s.companySize !== "50_plus") p.set(`${prefix}cs`, s.companySize);
+  if (s.atmpRate !== 2.08) p.set(`${prefix}at`, String(s.atmpRate));
+  if (s.hasTransportLevy) p.set(`${prefix}tl`, "1");
+  if (s.transportLevyRate !== 2.95) p.set(`${prefix}tr`, String(s.transportLevyRate));
+  if (s.prevoyanceRate !== 1.50) p.set(`${prefix}pv`, String(s.prevoyanceRate));
+  if (s.isSeparateIncome) {
+    if (s.companySizeConjoint !== "50_plus") p.set(`${prefix}ccs`, s.companySizeConjoint);
+    if (s.atmpRateConjoint !== 2.08) p.set(`${prefix}cat`, String(s.atmpRateConjoint));
+    if (s.hasTransportLevyConjoint) p.set(`${prefix}ctl`, "1");
+    if (s.transportLevyRateConjoint !== 2.95) p.set(`${prefix}ctr`, String(s.transportLevyRateConjoint));
+    if (s.prevoyanceRateConjoint !== 1.50) p.set(`${prefix}cpv`, String(s.prevoyanceRateConjoint));
   }
 }
 

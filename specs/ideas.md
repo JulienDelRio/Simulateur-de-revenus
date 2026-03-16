@@ -80,9 +80,14 @@ Complète la v0.1 : le visiteur entre un salaire brut et obtient toute la chaîn
 - Détail des cotisations salariales (CSG, CRDS, retraite, etc.)
 - Salaire net avant impôt
 - Taux global de cotisations salariales
-- Uniquement la part salariale (le coût employeur / super brut arrive en v0.4)
+- Uniquement la part salariale (le coût employeur / super brut arrive en v0.3)
 
-### v0.3 — Micro-entrepreneur
+### v0.3 — Super brut / coût employeur
+
+Ajouter le calcul du super brut (coût total employeur) pour les salariés : salaire brut + cotisations patronales.
+Permet de visualiser la chaîne complète : super brut → brut → net avant impôt → net après IR.
+
+### v0.4 — Micro-entrepreneur
 
 Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abattement IR spécifique par activité.
 
@@ -101,11 +106,6 @@ Cotisations sociales forfaitaires (taux fixe selon type d'activité) et abatteme
 
 - Vérifie-t-on / affiche-t-on les seuils de CA (188 700 € / 77 700 €) ?
 
-### v0.4 — Super brut / coût employeur
-
-Ajouter le calcul du super brut (coût total employeur) pour les salariés : salaire brut + cotisations patronales.
-Permet de visualiser la chaîne complète : super brut → brut → net avant impôt → net après IR.
-
 ### v0.5 — Comparaison multi-statuts
 
 Comparaison côte à côte : salarié vs micro-entrepreneur vs SASU vs EI.
@@ -119,6 +119,20 @@ Comparer deux foyers avec des compositions différentes (situation familiale, no
 - Prélèvement à la source (taux personnalisé vs neutre)
 - CFE, TVA
 - Aide au choix de statut juridique
+
+### Futures versions — Situations types (presets)
+
+Proposer des profils pré-remplis que le visiteur sélectionne en un clic pour remplir le formulaire. Exemples :
+
+- SMIC célibataire
+- Salarié non-cadre 30k célibataire
+- Cadre 50k marié 2 enfants
+- Cadre supérieur 80k
+- Micro-entrepreneur BNC 60k (v0.3+)
+- Jeune diplômé 28k
+- Parent isolé 1 enfant 35k
+
+Le visiteur peut ensuite ajuster les valeurs. Les presets servent de point de départ pour accélérer la saisie et aider les visiteurs qui ne connaissent pas tous les paramètres.
 
 ## Idées sans version attribuée
 
